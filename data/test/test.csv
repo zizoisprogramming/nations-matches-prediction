@@ -1,0 +1,403 @@
+,date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,year,month,day
+47404,2024-06-21,Poland,Austria,1.0,3.0,EURO,Berlin,Germany,True,2024,6,21
+47405,2024-06-21,Netherlands,France,0.0,0.0,EURO,Leipzig,Germany,True,2024,6,21
+47406,2024-06-21,Slovakia,Ukraine,1.0,2.0,EURO,Düsseldorf,Germany,True,2024,6,21
+47408,2024-06-21,Peru,Chile,0.0,0.0,COPA,Arlington,United States,True,2024,6,21
+47409,2024-06-22,Belgium,Romania,2.0,0.0,EURO,Cologne,Germany,True,2024,6,22
+47410,2024-06-22,Georgia,Czech Republic,1.0,1.0,EURO,Hamburg,Germany,True,2024,6,22
+47411,2024-06-22,Turkey,Portugal,0.0,3.0,EURO,Dortmund,Germany,True,2024,6,22
+47414,2024-06-22,Ecuador,Venezuela,1.0,2.0,COPA,Santa Clara,United States,True,2024,6,22
+47415,2024-06-22,Mexico,Jamaica,1.0,0.0,COPA,Houston,United States,True,2024,6,22
+47416,2024-06-23,Germany,Switzerland,1.0,1.0,EURO,Frankfurt,Germany,False,2024,6,23
+47417,2024-06-23,Scotland,Hungary,0.0,1.0,EURO,Stuttgart,Germany,True,2024,6,23
+47418,2024-06-23,United States,Bolivia,2.0,0.0,COPA,Arlington,United States,False,2024,6,23
+47419,2024-06-23,Uruguay,Panama,3.0,1.0,COPA,Miami Gardens,United States,True,2024,6,23
+47420,2024-06-24,Albania,Spain,0.0,1.0,EURO,Düsseldorf,Germany,True,2024,6,24
+47421,2024-06-24,Croatia,Italy,1.0,1.0,EURO,Leipzig,Germany,True,2024,6,24
+47422,2024-06-24,Colombia,Paraguay,2.0,1.0,COPA,Houston,United States,True,2024,6,24
+47423,2024-06-24,Brazil,Costa Rica,0.0,0.0,COPA,Inglewood,United States,True,2024,6,24
+47424,2024-06-25,England,Slovenia,0.0,0.0,EURO,Cologne,Germany,True,2024,6,25
+47425,2024-06-25,Denmark,Serbia,0.0,0.0,EURO,Munich,Germany,True,2024,6,25
+47426,2024-06-25,Netherlands,Austria,2.0,3.0,EURO,Berlin,Germany,True,2024,6,25
+47427,2024-06-25,France,Poland,1.0,1.0,EURO,Dortmund,Germany,True,2024,6,25
+47428,2024-06-25,Peru,Canada,0.0,1.0,COPA,Kansas City,United States,True,2024,6,25
+47429,2024-06-25,Chile,Argentina,0.0,1.0,COPA,East Rutherford,United States,True,2024,6,25
+47430,2024-06-26,Slovakia,Romania,1.0,1.0,EURO,Frankfurt,Germany,True,2024,6,26
+47431,2024-06-26,Ukraine,Belgium,0.0,0.0,EURO,Stuttgart,Germany,True,2024,6,26
+47432,2024-06-26,Georgia,Portugal,2.0,0.0,EURO,Gelsenkirchen,Germany,True,2024,6,26
+47433,2024-06-26,Czech Republic,Turkey,1.0,2.0,EURO,Hamburg,Germany,True,2024,6,26
+47434,2024-06-26,Ecuador,Jamaica,3.0,1.0,COPA,Las Vegas,United States,True,2024,6,26
+47435,2024-06-26,Venezuela,Mexico,1.0,0.0,COPA,Inglewood,United States,True,2024,6,26
+47438,2024-06-27,United States,Panama,1.0,2.0,COPA,Atlanta,United States,False,2024,6,27
+47439,2024-06-27,Uruguay,Bolivia,5.0,0.0,COPA,East Rutherford,United States,True,2024,6,27
+47440,2024-06-28,Colombia,Costa Rica,3.0,0.0,COPA,Glendale,United States,True,2024,6,28
+47441,2024-06-28,Paraguay,Brazil,1.0,4.0,COPA,Las Vegas,United States,True,2024,6,28
+47442,2024-06-29,Switzerland,Italy,2.0,0.0,EURO,Berlin,Germany,True,2024,6,29
+47443,2024-06-29,Germany,Denmark,2.0,0.0,EURO,Dortmund,Germany,False,2024,6,29
+47444,2024-06-29,Argentina,Peru,2.0,0.0,COPA,Miami Gardens,United States,True,2024,6,29
+47445,2024-06-29,Canada,Chile,0.0,0.0,COPA,Orlando,United States,True,2024,6,29
+47446,2024-06-30,England,Slovakia,2.0,1.0,EURO,Gelsenkirchen,Germany,True,2024,6,30
+47447,2024-06-30,Spain,Georgia,4.0,1.0,EURO,Cologne,Germany,True,2024,6,30
+47450,2024-06-30,Mexico,Ecuador,0.0,0.0,COPA,Glendale,United States,True,2024,6,30
+47451,2024-06-30,Jamaica,Venezuela,0.0,3.0,COPA,Austin,United States,True,2024,6,30
+47452,2024-07-01,France,Belgium,1.0,0.0,EURO,Düsseldorf,Germany,True,2024,7,1
+47453,2024-07-01,Portugal,Slovenia,0.0,0.0,EURO,Frankfurt,Germany,True,2024,7,1
+47454,2024-07-01,United States,Uruguay,0.0,1.0,COPA,Kansas City,United States,False,2024,7,1
+47455,2024-07-01,Bolivia,Panama,1.0,3.0,COPA,Orlando,United States,True,2024,7,1
+47456,2024-07-02,Romania,Netherlands,0.0,3.0,EURO,Munich,Germany,True,2024,7,2
+47457,2024-07-02,Austria,Turkey,1.0,2.0,EURO,Leipzig,Germany,True,2024,7,2
+47458,2024-07-02,Brazil,Colombia,1.0,1.0,COPA,Santa Clara,United States,True,2024,7,2
+47459,2024-07-02,Costa Rica,Paraguay,2.0,1.0,COPA,Austin,United States,True,2024,7,2
+47460,2024-07-04,Argentina,Ecuador,1.0,1.0,COPA,Houston,United States,True,2024,7,4
+47461,2024-07-05,Germany,Spain,1.0,2.0,EURO,Stuttgart,Germany,False,2024,7,5
+47462,2024-07-05,Portugal,France,0.0,0.0,EURO,Hamburg,Germany,True,2024,7,5
+47463,2024-07-05,Venezuela,Canada,1.0,1.0,COPA,Arlington,United States,True,2024,7,5
+47464,2024-07-06,England,Switzerland,1.0,1.0,EURO,Düsseldorf,Germany,True,2024,7,6
+47465,2024-07-06,Netherlands,Turkey,2.0,1.0,EURO,Berlin,Germany,True,2024,7,6
+47466,2024-07-06,Uruguay,Brazil,0.0,0.0,COPA,Las Vegas,United States,True,2024,7,6
+47467,2024-07-06,Colombia,Panama,5.0,0.0,COPA,Glendale,United States,True,2024,7,6
+47468,2024-07-09,Spain,France,2.0,1.0,EURO,Munich,Germany,True,2024,7,9
+47469,2024-07-09,Argentina,Canada,2.0,0.0,COPA,East Rutherford,United States,True,2024,7,9
+47470,2024-07-10,Netherlands,England,1.0,2.0,EURO,Dortmund,Germany,True,2024,7,10
+47471,2024-07-10,Uruguay,Colombia,0.0,1.0,COPA,Charlotte,United States,True,2024,7,10
+47472,2024-07-13,Canada,Uruguay,2.0,2.0,COPA,Charlotte,United States,True,2024,7,13
+47473,2024-07-14,Spain,England,2.0,1.0,EURO,Berlin,Germany,True,2024,7,14
+47474,2024-07-14,Argentina,Colombia,1.0,0.0,COPA,Miami Gardens,United States,True,2024,7,14
+47509,2024-09-05,Portugal,Croatia,2.0,1.0,UEFA,Lisbon,Portugal,False,2024,9,5
+47510,2024-09-05,Scotland,Poland,2.0,3.0,UEFA,Glasgow,Scotland,False,2024,9,5
+47511,2024-09-05,Denmark,Switzerland,2.0,0.0,UEFA,Copenhagen,Denmark,False,2024,9,5
+47512,2024-09-05,Serbia,Spain,0.0,0.0,UEFA,Belgrade,Serbia,False,2024,9,5
+47513,2024-09-05,Azerbaijan,Sweden,1.0,3.0,UEFA,Baku,Azerbaijan,False,2024,9,5
+47514,2024-09-05,Estonia,Slovakia,0.0,1.0,UEFA,Tallinn,Estonia,False,2024,9,5
+47515,2024-09-05,Northern Ireland,Luxembourg,2.0,0.0,UEFA,Belfast,Northern Ireland,False,2024,9,5
+47516,2024-09-05,Belarus,Bulgaria,0.0,0.0,UEFA,Zalaegerszeg,Hungary,True,2024,9,5
+47517,2024-09-05,San Marino,Liechtenstein,1.0,0.0,UEFA,Serravalle,San Marino,False,2024,9,5
+47548,2024-09-06,Belgium,Israel,3.0,1.0,UEFA,Debrecen,Hungary,True,2024,9,6
+47549,2024-09-06,France,Italy,1.0,3.0,UEFA,Paris,France,False,2024,9,6
+47550,2024-09-06,Kazakhstan,Norway,0.0,0.0,UEFA,Almaty,Kazakhstan,False,2024,9,6
+47551,2024-09-06,Slovenia,Austria,1.0,1.0,UEFA,Ljubljana,Slovenia,False,2024,9,6
+47552,2024-09-06,Iceland,Montenegro,2.0,0.0,UEFA,Reykjavík,Iceland,False,2024,9,6
+47553,2024-09-06,Wales,Turkey,0.0,0.0,UEFA,Cardiff,Wales,False,2024,9,6
+47554,2024-09-06,Kosovo,Romania,0.0,3.0,UEFA,Pristina,Kosovo,False,2024,9,6
+47555,2024-09-06,Lithuania,Cyprus,0.0,1.0,UEFA,Kaunas,Lithuania,False,2024,9,6
+47571,2024-09-07,Germany,Hungary,5.0,0.0,UEFA,Düsseldorf,Germany,False,2024,9,7
+47572,2024-09-07,Netherlands,Bosnia and Herzegovina,5.0,2.0,UEFA,Eindhoven,Netherlands,False,2024,9,7
+47573,2024-09-07,Georgia,Czech Republic,4.0,1.0,UEFA,Tbilisi,Georgia,False,2024,9,7
+47574,2024-09-07,Ukraine,Albania,1.0,2.0,UEFA,Prague,Czech Republic,True,2024,9,7
+47575,2024-09-07,Republic of Ireland,England,0.0,2.0,UEFA,Dublin,Republic of Ireland,False,2024,9,7
+47576,2024-09-07,Greece,Finland,3.0,0.0,UEFA,Piraeus,Greece,False,2024,9,7
+47577,2024-09-07,Faroe Islands,North Macedonia,1.0,1.0,UEFA,Toftir,Faroe Islands,False,2024,9,7
+47578,2024-09-07,Armenia,Latvia,4.0,1.0,UEFA,Yerevan,Armenia,False,2024,9,7
+47579,2024-09-07,Moldova,Malta,2.0,0.0,UEFA,Chișinău,Moldova,False,2024,9,7
+47586,2024-09-08,Portugal,Scotland,2.0,1.0,UEFA,Lisbon,Portugal,False,2024,9,8
+47587,2024-09-08,Croatia,Poland,1.0,0.0,UEFA,Osijek,Croatia,False,2024,9,8
+47588,2024-09-08,Denmark,Serbia,2.0,0.0,UEFA,Copenhagen,Denmark,False,2024,9,8
+47589,2024-09-08,Switzerland,Spain,1.0,4.0,UEFA,Geneva,Switzerland,False,2024,9,8
+47590,2024-09-08,Slovakia,Azerbaijan,2.0,0.0,UEFA,Košice,Slovakia,False,2024,9,8
+47591,2024-09-08,Sweden,Estonia,3.0,0.0,UEFA,Stockholm,Sweden,False,2024,9,8
+47592,2024-09-08,Luxembourg,Belarus,0.0,1.0,UEFA,Luxembourg,Luxembourg,False,2024,9,8
+47593,2024-09-08,Bulgaria,Northern Ireland,1.0,0.0,UEFA,Plovdiv,Bulgaria,False,2024,9,8
+47594,2024-09-08,Gibraltar,Liechtenstein,2.0,2.0,UEFA,Gibraltar,Gibraltar,False,2024,9,8
+47611,2024-09-09,France,Belgium,2.0,0.0,UEFA,Décines-Charpieu,France,False,2024,9,9
+47612,2024-09-09,Israel,Italy,1.0,2.0,UEFA,Budapest,Hungary,True,2024,9,9
+47613,2024-09-09,Norway,Austria,2.0,1.0,UEFA,Oslo,Norway,False,2024,9,9
+47614,2024-09-09,Slovenia,Kazakhstan,3.0,0.0,UEFA,Ljubljana,Slovenia,False,2024,9,9
+47615,2024-09-09,Montenegro,Wales,1.0,2.0,UEFA,Nikšić,Montenegro,False,2024,9,9
+47616,2024-09-09,Turkey,Iceland,3.0,1.0,UEFA,İzmir,Turkey,False,2024,9,9
+47617,2024-09-09,Cyprus,Kosovo,0.0,4.0,UEFA,Larnaca,Cyprus,False,2024,9,9
+47618,2024-09-09,Romania,Lithuania,3.0,1.0,UEFA,Bucharest,Romania,False,2024,9,9
+47649,2024-09-10,Hungary,Bosnia and Herzegovina,0.0,0.0,UEFA,Budapest,Hungary,False,2024,9,10
+47650,2024-09-10,Netherlands,Germany,2.0,2.0,UEFA,Amsterdam,Netherlands,False,2024,9,10
+47651,2024-09-10,Albania,Georgia,0.0,1.0,UEFA,Tirana,Albania,False,2024,9,10
+47652,2024-09-10,Czech Republic,Ukraine,3.0,2.0,UEFA,Prague,Czech Republic,False,2024,9,10
+47653,2024-09-10,England,Finland,2.0,0.0,UEFA,London,England,False,2024,9,10
+47654,2024-09-10,Republic of Ireland,Greece,0.0,2.0,UEFA,Dublin,Republic of Ireland,False,2024,9,10
+47655,2024-09-10,Latvia,Faroe Islands,1.0,0.0,UEFA,Riga,Latvia,False,2024,9,10
+47656,2024-09-10,North Macedonia,Armenia,2.0,0.0,UEFA,Skopje,North Macedonia,False,2024,9,10
+47657,2024-09-10,Andorra,Malta,0.0,1.0,UEFA,Andorra la Vella,Andorra,False,2024,9,10
+47690,2024-10-10,Israel,France,1.0,4.0,UEFA,Budapest,Hungary,True,2024,10,10
+47691,2024-10-10,Italy,Belgium,2.0,2.0,UEFA,Rome,Italy,False,2024,10,10
+47692,2024-10-10,England,Greece,1.0,2.0,UEFA,London,England,False,2024,10,10
+47693,2024-10-10,Finland,Republic of Ireland,1.0,2.0,UEFA,Helsinki,Finland,False,2024,10,10
+47694,2024-10-10,Austria,Kazakhstan,4.0,0.0,UEFA,Salzburg,Austria,False,2024,10,10
+47695,2024-10-10,Norway,Slovenia,3.0,0.0,UEFA,Oslo,Norway,False,2024,10,10
+47696,2024-10-10,Latvia,North Macedonia,0.0,3.0,UEFA,Riga,Latvia,False,2024,10,10
+47697,2024-10-10,Faroe Islands,Armenia,2.0,2.0,UEFA,Tórshavn,Faroe Islands,False,2024,10,10
+47698,2024-10-10,Gibraltar,San Marino,1.0,0.0,UEFA,Gibraltar,Gibraltar,False,2024,10,10
+47699,2024-10-10,Moldova,Andorra,2.0,0.0,UEFA,Chișinău,Moldova,False,2024,10,10
+47739,2024-10-11,Bosnia and Herzegovina,Germany,1.0,2.0,UEFA,Zenica,Bosnia and Herzegovina,False,2024,10,11
+47740,2024-10-11,Hungary,Netherlands,1.0,1.0,UEFA,Budapest,Hungary,False,2024,10,11
+47741,2024-10-11,Czech Republic,Albania,2.0,0.0,UEFA,Prague,Czech Republic,False,2024,10,11
+47742,2024-10-11,Ukraine,Georgia,1.0,0.0,UEFA,Poznań,Poland,True,2024,10,11
+47743,2024-10-11,Iceland,Wales,2.0,2.0,UEFA,Reykjavík,Iceland,False,2024,10,11
+47744,2024-10-11,Turkey,Montenegro,1.0,0.0,UEFA,Tekkeköy,Turkey,False,2024,10,11
+47745,2024-10-11,Estonia,Azerbaijan,3.0,1.0,UEFA,Tallinn,Estonia,False,2024,10,11
+47746,2024-10-11,Slovakia,Sweden,2.0,2.0,UEFA,Bratislava,Slovakia,False,2024,10,11
+47760,2024-10-12,Croatia,Scotland,2.0,1.0,UEFA,Zagreb,Croatia,False,2024,10,12
+47761,2024-10-12,Poland,Portugal,1.0,3.0,UEFA,Warsaw,Poland,False,2024,10,12
+47762,2024-10-12,Serbia,Switzerland,2.0,0.0,UEFA,Leskovac,Serbia,False,2024,10,12
+47763,2024-10-12,Spain,Denmark,1.0,0.0,UEFA,Murcia,Spain,False,2024,10,12
+47764,2024-10-12,Lithuania,Kosovo,1.0,2.0,UEFA,Kaunas,Lithuania,False,2024,10,12
+47765,2024-10-12,Cyprus,Romania,0.0,3.0,UEFA,Larnaca,Cyprus,False,2024,10,12
+47766,2024-10-12,Bulgaria,Luxembourg,0.0,0.0,UEFA,Plovdiv,Bulgaria,False,2024,10,12
+47767,2024-10-12,Belarus,Northern Ireland,0.0,0.0,UEFA,Zalaegerszeg,Hungary,True,2024,10,12
+47774,2024-10-13,Finland,England,1.0,3.0,UEFA,Helsinki,Finland,False,2024,10,13
+47775,2024-10-13,Greece,Republic of Ireland,2.0,0.0,UEFA,Piraeus,Greece,False,2024,10,13
+47776,2024-10-13,Kazakhstan,Slovenia,0.0,1.0,UEFA,Astana,Kazakhstan,False,2024,10,13
+47777,2024-10-13,Austria,Norway,5.0,1.0,UEFA,Linz,Austria,False,2024,10,13
+47778,2024-10-13,Faroe Islands,Latvia,1.0,1.0,UEFA,Tórshavn,Faroe Islands,False,2024,10,13
+47779,2024-10-13,Armenia,North Macedonia,0.0,2.0,UEFA,Yerevan,Armenia,False,2024,10,13
+47780,2024-10-13,Liechtenstein,Gibraltar,0.0,0.0,UEFA,Vaduz,Liechtenstein,False,2024,10,13
+47781,2024-10-13,Malta,Moldova,1.0,0.0,UEFA,Ta' Qali,Malta,False,2024,10,13
+47796,2024-10-14,Belgium,France,1.0,2.0,UEFA,Leuven,Belgium,False,2024,10,14
+47797,2024-10-14,Italy,Israel,4.0,1.0,UEFA,Udine,Italy,False,2024,10,14
+47798,2024-10-14,Bosnia and Herzegovina,Hungary,0.0,2.0,UEFA,Zenica,Bosnia and Herzegovina,False,2024,10,14
+47799,2024-10-14,Germany,Netherlands,1.0,0.0,UEFA,Munich,Germany,False,2024,10,14
+47800,2024-10-14,Georgia,Albania,0.0,1.0,UEFA,Tbilisi,Georgia,False,2024,10,14
+47801,2024-10-14,Ukraine,Czech Republic,1.0,1.0,UEFA,Wrocław,Poland,True,2024,10,14
+47802,2024-10-14,Iceland,Turkey,2.0,4.0,UEFA,Reykjavík,Iceland,False,2024,10,14
+47803,2024-10-14,Wales,Montenegro,1.0,0.0,UEFA,Cardiff,Wales,False,2024,10,14
+47804,2024-10-14,Azerbaijan,Slovakia,1.0,3.0,UEFA,Baku,Azerbaijan,False,2024,10,14
+47805,2024-10-14,Estonia,Sweden,0.0,3.0,UEFA,Tallinn,Estonia,False,2024,10,14
+47835,2024-10-15,Scotland,Portugal,0.0,0.0,UEFA,Glasgow,Scotland,False,2024,10,15
+47836,2024-10-15,Poland,Croatia,3.0,3.0,UEFA,Warsaw,Poland,False,2024,10,15
+47837,2024-10-15,Spain,Serbia,3.0,0.0,UEFA,Córdoba,Spain,False,2024,10,15
+47838,2024-10-15,Switzerland,Denmark,2.0,2.0,UEFA,St. Gallen,Switzerland,False,2024,10,15
+47839,2024-10-15,Kosovo,Cyprus,3.0,0.0,UEFA,Pristina,Kosovo,False,2024,10,15
+47840,2024-10-15,Lithuania,Romania,1.0,2.0,UEFA,Kaunas,Lithuania,False,2024,10,15
+47841,2024-10-15,Northern Ireland,Bulgaria,5.0,0.0,UEFA,Belfast,Northern Ireland,False,2024,10,15
+47842,2024-10-15,Belarus,Luxembourg,1.0,1.0,UEFA,Zalaegerszeg,Hungary,True,2024,10,15
+47863,2024-11-14,Belgium,Italy,0.0,1.0,UEFA,Brussels,Belgium,False,2024,11,14
+47864,2024-11-14,France,Israel,0.0,0.0,UEFA,Paris,France,False,2024,11,14
+47865,2024-11-14,Republic of Ireland,Finland,1.0,0.0,UEFA,Dublin,Republic of Ireland,False,2024,11,14
+47866,2024-11-14,Greece,England,0.0,3.0,UEFA,Athens,Greece,False,2024,11,14
+47867,2024-11-14,Kazakhstan,Austria,0.0,2.0,UEFA,Almaty,Kazakhstan,False,2024,11,14
+47868,2024-11-14,Slovenia,Norway,1.0,4.0,UEFA,Ljubljana,Slovenia,False,2024,11,14
+47869,2024-11-14,North Macedonia,Latvia,1.0,0.0,UEFA,Skopje,North Macedonia,False,2024,11,14
+47870,2024-11-14,Armenia,Faroe Islands,0.0,1.0,UEFA,Yerevan,Armenia,False,2024,11,14
+47904,2024-11-15,Portugal,Poland,5.0,1.0,UEFA,Porto,Portugal,False,2024,11,15
+47905,2024-11-15,Scotland,Croatia,1.0,0.0,UEFA,Glasgow,Scotland,False,2024,11,15
+47906,2024-11-15,Denmark,Spain,1.0,2.0,UEFA,Copenhagen,Denmark,False,2024,11,15
+47907,2024-11-15,Switzerland,Serbia,1.0,1.0,UEFA,Zürich,Switzerland,False,2024,11,15
+47908,2024-11-15,Cyprus,Lithuania,2.0,1.0,UEFA,Larnaca,Cyprus,False,2024,11,15
+47909,2024-11-15,Romania,Kosovo,0.0,0.0,UEFA,Bucharest,Romania,False,2024,11,15
+47910,2024-11-15,Northern Ireland,Belarus,2.0,0.0,UEFA,Belfast,Northern Ireland,False,2024,11,15
+47911,2024-11-15,Luxembourg,Bulgaria,0.0,1.0,UEFA,Luxembourg,Luxembourg,False,2024,11,15
+47912,2024-11-15,San Marino,Gibraltar,1.0,1.0,UEFA,Serravalle,San Marino,False,2024,11,15
+47937,2024-11-16,Germany,Bosnia and Herzegovina,7.0,0.0,UEFA,Freiburg,Germany,False,2024,11,16
+47938,2024-11-16,Netherlands,Hungary,4.0,0.0,UEFA,Amsterdam,Netherlands,False,2024,11,16
+47939,2024-11-16,Albania,Czech Republic,0.0,0.0,UEFA,Tirana,Albania,False,2024,11,16
+47940,2024-11-16,Georgia,Ukraine,1.0,1.0,UEFA,Batumi,Georgia,False,2024,11,16
+47941,2024-11-16,Montenegro,Iceland,0.0,2.0,UEFA,Nikšić,Montenegro,False,2024,11,16
+47942,2024-11-16,Turkey,Wales,0.0,0.0,UEFA,Kayseri,Turkey,False,2024,11,16
+47943,2024-11-16,Azerbaijan,Estonia,0.0,0.0,UEFA,Gabala,Azerbaijan,False,2024,11,16
+47944,2024-11-16,Sweden,Slovakia,2.0,1.0,UEFA,Solna,Sweden,False,2024,11,16
+47945,2024-11-16,Andorra,Moldova,0.0,1.0,UEFA,Andorra la Vella,Andorra,False,2024,11,16
+47953,2024-11-17,Israel,Belgium,1.0,0.0,UEFA,Budapest,Hungary,True,2024,11,17
+47954,2024-11-17,Italy,France,1.0,3.0,UEFA,Milan,Italy,False,2024,11,17
+47955,2024-11-17,England,Republic of Ireland,5.0,0.0,UEFA,London,England,False,2024,11,17
+47956,2024-11-17,Finland,Greece,0.0,2.0,UEFA,Helsinki,Finland,False,2024,11,17
+47957,2024-11-17,Norway,Kazakhstan,5.0,0.0,UEFA,Oslo,Norway,False,2024,11,17
+47958,2024-11-17,Austria,Slovenia,1.0,1.0,UEFA,Vienna,Austria,False,2024,11,17
+47959,2024-11-17,North Macedonia,Faroe Islands,1.0,0.0,UEFA,Skopje,North Macedonia,False,2024,11,17
+47960,2024-11-17,Latvia,Armenia,1.0,2.0,UEFA,Riga,Latvia,False,2024,11,17
+47968,2024-11-18,Croatia,Portugal,1.0,1.0,UEFA,Split,Croatia,False,2024,11,18
+47969,2024-11-18,Poland,Scotland,1.0,2.0,UEFA,Warsaw,Poland,False,2024,11,18
+47970,2024-11-18,Serbia,Denmark,0.0,0.0,UEFA,Leskovac,Serbia,False,2024,11,18
+47971,2024-11-18,Spain,Switzerland,3.0,2.0,UEFA,Santa Cruz de Tenerife,Spain,False,2024,11,18
+47972,2024-11-18,Kosovo,Lithuania,1.0,0.0,UEFA,Pristina,Kosovo,False,2024,11,18
+47973,2024-11-18,Romania,Cyprus,4.0,1.0,UEFA,Bucharest,Romania,False,2024,11,18
+47974,2024-11-18,Luxembourg,Northern Ireland,2.0,2.0,UEFA,Luxembourg,Luxembourg,False,2024,11,18
+47975,2024-11-18,Bulgaria,Belarus,1.0,1.0,UEFA,Sofia,Bulgaria,False,2024,11,18
+47976,2024-11-18,Liechtenstein,San Marino,1.0,3.0,UEFA,Vaduz,Liechtenstein,False,2024,11,18
+47997,2024-11-19,Bosnia and Herzegovina,Netherlands,1.0,1.0,UEFA,Zenica,Bosnia and Herzegovina,False,2024,11,19
+47998,2024-11-19,Hungary,Germany,1.0,1.0,UEFA,Budapest,Hungary,False,2024,11,19
+47999,2024-11-19,Albania,Ukraine,1.0,2.0,UEFA,Tirana,Albania,False,2024,11,19
+48000,2024-11-19,Czech Republic,Georgia,2.0,1.0,UEFA,Olomouc,Czech Republic,False,2024,11,19
+48001,2024-11-19,Wales,Iceland,4.0,1.0,UEFA,Cardiff,Wales,False,2024,11,19
+48002,2024-11-19,Montenegro,Turkey,3.0,1.0,UEFA,Podgorica,Montenegro,False,2024,11,19
+48003,2024-11-19,Slovakia,Estonia,1.0,0.0,UEFA,Trnava,Slovakia,False,2024,11,19
+48004,2024-11-19,Sweden,Azerbaijan,6.0,0.0,UEFA,Solna,Sweden,False,2024,11,19
+48005,2024-11-19,Malta,Andorra,0.0,0.0,UEFA,Ta' Qali,Malta,False,2024,11,19
+48126,2025-03-20,Croatia,France,2.0,0.0,UEFA,Split,Croatia,False,2025,3,20
+48127,2025-03-20,Denmark,Portugal,1.0,0.0,UEFA,Copenhagen,Denmark,False,2025,3,20
+48128,2025-03-20,Italy,Germany,1.0,2.0,UEFA,Milan,Italy,False,2025,3,20
+48129,2025-03-20,Netherlands,Spain,2.0,2.0,UEFA,Rotterdam,Netherlands,False,2025,3,20
+48130,2025-03-20,Austria,Serbia,1.0,1.0,UEFA,Vienna,Austria,False,2025,3,20
+48131,2025-03-20,Greece,Scotland,0.0,1.0,UEFA,Piraeus,Greece,False,2025,3,20
+48132,2025-03-20,Turkey,Hungary,3.0,1.0,UEFA,Istanbul,Turkey,False,2025,3,20
+48133,2025-03-20,Ukraine,Belgium,3.0,1.0,UEFA,Murcia,Spain,True,2025,3,20
+48134,2025-03-20,Armenia,Georgia,0.0,3.0,UEFA,Yerevan,Armenia,False,2025,3,20
+48135,2025-03-20,Bulgaria,Republic of Ireland,1.0,2.0,UEFA,Plovdiv,Bulgaria,False,2025,3,20
+48136,2025-03-20,Kosovo,Iceland,2.0,1.0,UEFA,Pristina,Kosovo,False,2025,3,20
+48137,2025-03-20,Slovakia,Slovenia,0.0,0.0,UEFA,Bratislava,Slovakia,False,2025,3,20
+48206,2025-03-23,France,Croatia,2.0,0.0,UEFA,Paris,France,False,2025,3,23
+48207,2025-03-23,Germany,Italy,3.0,3.0,UEFA,Dortmund,Germany,False,2025,3,23
+48208,2025-03-23,Portugal,Denmark,5.0,2.0,UEFA,Lisbon,Portugal,False,2025,3,23
+48209,2025-03-23,Spain,Netherlands,3.0,3.0,UEFA,Valencia,Spain,False,2025,3,23
+48210,2025-03-23,Belgium,Ukraine,3.0,0.0,UEFA,Genk,Belgium,False,2025,3,23
+48211,2025-03-23,Hungary,Turkey,0.0,3.0,UEFA,Budapest,Hungary,False,2025,3,23
+48212,2025-03-23,Scotland,Greece,0.0,3.0,UEFA,Glasgow,Scotland,False,2025,3,23
+48213,2025-03-23,Serbia,Austria,2.0,0.0,UEFA,Belgrade,Serbia,False,2025,3,23
+48214,2025-03-23,Georgia,Armenia,6.0,1.0,UEFA,Tbilisi,Georgia,False,2025,3,23
+48215,2025-03-23,Iceland,Kosovo,1.0,3.0,UEFA,Murcia,Spain,True,2025,3,23
+48216,2025-03-23,Republic of Ireland,Bulgaria,2.0,1.0,UEFA,Dublin,Republic of Ireland,False,2025,3,23
+48217,2025-03-23,Slovenia,Slovakia,1.0,0.0,UEFA,Ljubljana,Slovenia,False,2025,3,23
+48314,2025-06-04,Germany,Portugal,1.0,2.0,UEFA,Munich,Germany,False,2025,6,4
+48323,2025-06-05,Spain,France,5.0,4.0,UEFA,Stuttgart,Germany,True,2025,6,5
+48394,2025-06-08,Germany,France,0.0,2.0,UEFA,Stuttgart,Germany,False,2025,6,8
+48395,2025-06-08,Portugal,Spain,2.0,2.0,UEFA,Munich,Germany,True,2025,6,8
+49061,2025-12-21,Morocco,Comoros,2.0,0.0,AFCON,Rabat,Morocco,False,2025,12,21
+49062,2025-12-22,Mali,Zambia,1.0,1.0,AFCON,Casablanca,Morocco,True,2025,12,22
+49063,2025-12-22,South Africa,Angola,2.0,1.0,AFCON,Marrakesh,Morocco,True,2025,12,22
+49064,2025-12-22,Egypt,Zimbabwe,2.0,1.0,AFCON,Agadir,Morocco,True,2025,12,22
+49065,2025-12-23,Nigeria,Tanzania,2.0,1.0,AFCON,Fez,Morocco,True,2025,12,23
+49066,2025-12-23,Tunisia,Uganda,3.0,1.0,AFCON,Rabat,Morocco,True,2025,12,23
+49067,2025-12-23,DR Congo,Benin,1.0,0.0,AFCON,Rabat,Morocco,True,2025,12,23
+49068,2025-12-23,Senegal,Botswana,3.0,0.0,AFCON,Tangier,Morocco,True,2025,12,23
+49069,2025-12-24,Burkina Faso,Equatorial Guinea,2.0,1.0,AFCON,Casablanca,Morocco,True,2025,12,24
+49070,2025-12-24,Algeria,Sudan,3.0,0.0,AFCON,Rabat,Morocco,True,2025,12,24
+49071,2025-12-24,Ivory Coast,Mozambique,1.0,0.0,AFCON,Marrakesh,Morocco,True,2025,12,24
+49072,2025-12-24,Cameroon,Gabon,1.0,0.0,AFCON,Agadir,Morocco,True,2025,12,24
+49073,2025-12-26,Zambia,Comoros,0.0,0.0,AFCON,Casablanca,Morocco,True,2025,12,26
+49074,2025-12-26,Morocco,Mali,1.0,1.0,AFCON,Rabat,Morocco,False,2025,12,26
+49075,2025-12-26,Angola,Zimbabwe,1.0,1.0,AFCON,Marrakesh,Morocco,True,2025,12,26
+49076,2025-12-26,Egypt,South Africa,1.0,0.0,AFCON,Agadir,Morocco,True,2025,12,26
+49077,2025-12-27,Uganda,Tanzania,1.0,1.0,AFCON,Rabat,Morocco,True,2025,12,27
+49078,2025-12-27,Nigeria,Tunisia,3.0,2.0,AFCON,Fez,Morocco,True,2025,12,27
+49079,2025-12-27,Benin,Botswana,1.0,0.0,AFCON,Rabat,Morocco,True,2025,12,27
+49080,2025-12-27,Senegal,DR Congo,1.0,1.0,AFCON,Tangier,Morocco,True,2025,12,27
+49081,2025-12-28,Equatorial Guinea,Sudan,0.0,1.0,AFCON,Casablanca,Morocco,True,2025,12,28
+49082,2025-12-28,Algeria,Burkina Faso,1.0,0.0,AFCON,Rabat,Morocco,True,2025,12,28
+49083,2025-12-28,Gabon,Mozambique,2.0,3.0,AFCON,Agadir,Morocco,True,2025,12,28
+49084,2025-12-28,Ivory Coast,Cameroon,1.0,1.0,AFCON,Marrakesh,Morocco,True,2025,12,28
+49085,2025-12-29,Morocco,Zambia,3.0,0.0,AFCON,Rabat,Morocco,False,2025,12,29
+49086,2025-12-29,Comoros,Mali,0.0,0.0,AFCON,Casablanca,Morocco,True,2025,12,29
+49087,2025-12-29,Angola,Egypt,0.0,0.0,AFCON,Agadir,Morocco,True,2025,12,29
+49088,2025-12-29,Zimbabwe,South Africa,2.0,3.0,AFCON,Marrakesh,Morocco,True,2025,12,29
+49089,2025-12-30,Uganda,Nigeria,1.0,3.0,AFCON,Fez,Morocco,True,2025,12,30
+49090,2025-12-30,Tanzania,Tunisia,1.0,1.0,AFCON,Rabat,Morocco,True,2025,12,30
+49091,2025-12-30,Benin,Senegal,0.0,3.0,AFCON,Tangier,Morocco,True,2025,12,30
+49092,2025-12-30,Botswana,DR Congo,0.0,3.0,AFCON,Rabat,Morocco,True,2025,12,30
+49093,2025-12-31,Equatorial Guinea,Algeria,1.0,3.0,AFCON,Rabat,Morocco,True,2025,12,31
+49094,2025-12-31,Sudan,Burkina Faso,0.0,2.0,AFCON,Casablanca,Morocco,True,2025,12,31
+49095,2025-12-31,Gabon,Ivory Coast,2.0,3.0,AFCON,Marrakesh,Morocco,True,2025,12,31
+49096,2025-12-31,Mozambique,Cameroon,1.0,2.0,AFCON,Agadir,Morocco,True,2025,12,31
+49097,2026-01-03,Senegal,Sudan,3.0,1.0,AFCON,Tangier,Morocco,True,2026,1,3
+49098,2026-01-03,Mali,Tunisia,1.0,1.0,AFCON,Casablanca,Morocco,True,2026,1,3
+49099,2026-01-04,Morocco,Tanzania,1.0,0.0,AFCON,Rabat,Morocco,False,2026,1,4
+49100,2026-01-04,South Africa,Cameroon,1.0,2.0,AFCON,Rabat,Morocco,True,2026,1,4
+49101,2026-01-05,Egypt,Benin,3.0,1.0,AFCON,Agadir,Morocco,True,2026,1,5
+49102,2026-01-05,Nigeria,Mozambique,4.0,0.0,AFCON,Fez,Morocco,True,2026,1,5
+49103,2026-01-06,Algeria,DR Congo,1.0,0.0,AFCON,Rabat,Morocco,True,2026,1,6
+49104,2026-01-06,Ivory Coast,Burkina Faso,3.0,0.0,AFCON,Marrakesh,Morocco,True,2026,1,6
+49105,2026-01-09,Mali,Senegal,0.0,1.0,AFCON,Tangier,Morocco,True,2026,1,9
+49106,2026-01-09,Morocco,Cameroon,2.0,0.0,AFCON,Rabat,Morocco,False,2026,1,9
+49107,2026-01-10,Algeria,Nigeria,0.0,2.0,AFCON,Marrakesh,Morocco,True,2026,1,10
+49108,2026-01-10,Egypt,Ivory Coast,3.0,2.0,AFCON,Agadir,Morocco,True,2026,1,10
+49109,2026-01-14,Senegal,Egypt,1.0,0.0,AFCON,Tangier,Morocco,True,2026,1,14
+49110,2026-01-14,Morocco,Nigeria,0.0,0.0,AFCON,Rabat,Morocco,False,2026,1,14
+49111,2026-01-17,Egypt,Nigeria,0.0,0.0,AFCON,Casablanca,Morocco,True,2026,1,17
+49112,2026-01-18,Morocco,Senegal,3.0,0.0,AFCON,Rabat,Morocco,False,2026,1,18
+49416,2026-06-11,Mexico,South Africa,2.0,0.0,FWC,Mexico City,Mexico,False,2026,6,11
+49417,2026-06-11,South Korea,Czech Republic,2.0,1.0,FWC,Zapopan,Mexico,True,2026,6,11
+49418,2026-06-12,Canada,Bosnia and Herzegovina,1.0,1.0,FWC,Toronto,Canada,False,2026,6,12
+49419,2026-06-12,United States,Paraguay,4.0,1.0,FWC,Inglewood,United States,False,2026,6,12
+49420,2026-06-13,Qatar,Switzerland,1.0,1.0,FWC,Santa Clara,United States,True,2026,6,13
+49421,2026-06-13,Brazil,Morocco,1.0,1.0,FWC,East Rutherford,United States,True,2026,6,13
+49422,2026-06-13,Haiti,Scotland,0.0,1.0,FWC,Foxborough,United States,True,2026,6,13
+49423,2026-06-13,Australia,Turkey,2.0,0.0,FWC,Vancouver,Canada,True,2026,6,13
+49424,2026-06-14,Germany,Curaçao,7.0,1.0,FWC,Houston,United States,True,2026,6,14
+49425,2026-06-14,Ivory Coast,Ecuador,1.0,0.0,FWC,Philadelphia,United States,True,2026,6,14
+49426,2026-06-14,Netherlands,Japan,2.0,2.0,FWC,Arlington,United States,True,2026,6,14
+49427,2026-06-14,Sweden,Tunisia,5.0,1.0,FWC,Guadalupe,Mexico,True,2026,6,14
+49428,2026-06-15,Belgium,Egypt,1.0,1.0,FWC,Seattle,United States,True,2026,6,15
+49429,2026-06-15,Iran,New Zealand,2.0,2.0,FWC,Inglewood,United States,True,2026,6,15
+49430,2026-06-15,Spain,Cape Verde,0.0,0.0,FWC,Atlanta,United States,True,2026,6,15
+49431,2026-06-15,Saudi Arabia,Uruguay,1.0,1.0,FWC,Miami Gardens,United States,True,2026,6,15
+49432,2026-06-16,France,Senegal,3.0,1.0,FWC,East Rutherford,United States,True,2026,6,16
+49433,2026-06-16,Iraq,Norway,1.0,4.0,FWC,Foxborough,United States,True,2026,6,16
+49434,2026-06-16,Argentina,Algeria,3.0,0.0,FWC,Kansas City,United States,True,2026,6,16
+49435,2026-06-16,Austria,Jordan,3.0,1.0,FWC,Santa Clara,United States,True,2026,6,16
+49436,2026-06-17,Portugal,DR Congo,1.0,1.0,FWC,Houston,United States,True,2026,6,17
+49437,2026-06-17,Uzbekistan,Colombia,1.0,3.0,FWC,Mexico City,Mexico,True,2026,6,17
+49438,2026-06-17,England,Croatia,4.0,2.0,FWC,Arlington,United States,True,2026,6,17
+49439,2026-06-17,Ghana,Panama,1.0,0.0,FWC,Toronto,Canada,True,2026,6,17
+49440,2026-06-18,Czech Republic,South Africa,1.0,1.0,FWC,Atlanta,United States,True,2026,6,18
+49441,2026-06-18,Mexico,South Korea,1.0,0.0,FWC,Zapopan,Mexico,False,2026,6,18
+49442,2026-06-18,Switzerland,Bosnia and Herzegovina,4.0,1.0,FWC,Inglewood,United States,True,2026,6,18
+49443,2026-06-18,Canada,Qatar,6.0,0.0,FWC,Vancouver,Canada,False,2026,6,18
+49444,2026-06-19,Scotland,Morocco,0.0,1.0,FWC,Foxborough,United States,True,2026,6,19
+49445,2026-06-19,Brazil,Haiti,3.0,0.0,FWC,Philadelphia,United States,True,2026,6,19
+49446,2026-06-19,United States,Australia,2.0,0.0,FWC,Seattle,United States,False,2026,6,19
+49447,2026-06-19,Turkey,Paraguay,0.0,1.0,FWC,Santa Clara,United States,True,2026,6,19
+49448,2026-06-20,Germany,Ivory Coast,2.0,1.0,FWC,Toronto,Canada,True,2026,6,20
+49449,2026-06-20,Ecuador,Curaçao,0.0,0.0,FWC,Kansas City,United States,True,2026,6,20
+49450,2026-06-20,Netherlands,Sweden,5.0,1.0,FWC,Houston,United States,True,2026,6,20
+49451,2026-06-20,Tunisia,Japan,0.0,4.0,FWC,Guadalupe,Mexico,True,2026,6,20
+49452,2026-06-21,Belgium,Iran,0.0,0.0,FWC,Inglewood,United States,True,2026,6,21
+49453,2026-06-21,New Zealand,Egypt,1.0,3.0,FWC,Vancouver,Canada,True,2026,6,21
+49454,2026-06-21,Spain,Saudi Arabia,4.0,0.0,FWC,Atlanta,United States,True,2026,6,21
+49455,2026-06-21,Uruguay,Cape Verde,2.0,2.0,FWC,Miami Gardens,United States,True,2026,6,21
+49456,2026-06-22,France,Iraq,3.0,0.0,FWC,Philadelphia,United States,True,2026,6,22
+49457,2026-06-22,Norway,Senegal,3.0,2.0,FWC,East Rutherford,United States,True,2026,6,22
+49458,2026-06-22,Argentina,Austria,2.0,0.0,FWC,Arlington,United States,True,2026,6,22
+49459,2026-06-22,Jordan,Algeria,1.0,2.0,FWC,Santa Clara,United States,True,2026,6,22
+49460,2026-06-23,Portugal,Uzbekistan,5.0,0.0,FWC,Houston,United States,True,2026,6,23
+49461,2026-06-23,Colombia,DR Congo,1.0,0.0,FWC,Zapopan,Mexico,True,2026,6,23
+49462,2026-06-23,England,Ghana,0.0,0.0,FWC,Foxborough,United States,True,2026,6,23
+49463,2026-06-23,Panama,Croatia,0.0,1.0,FWC,Toronto,Canada,True,2026,6,23
+49464,2026-06-24,Mexico,Czech Republic,3.0,0.0,FWC,Mexico City,Mexico,False,2026,6,24
+49465,2026-06-24,South Africa,South Korea,1.0,0.0,FWC,Guadalupe,Mexico,True,2026,6,24
+49466,2026-06-24,Canada,Switzerland,1.0,2.0,FWC,Vancouver,Canada,False,2026,6,24
+49467,2026-06-24,Bosnia and Herzegovina,Qatar,3.0,1.0,FWC,Seattle,United States,True,2026,6,24
+49468,2026-06-24,Scotland,Brazil,0.0,3.0,FWC,Miami Gardens,United States,True,2026,6,24
+49469,2026-06-24,Morocco,Haiti,4.0,2.0,FWC,Atlanta,United States,True,2026,6,24
+49470,2026-06-25,United States,Turkey,2.0,3.0,FWC,Inglewood,United States,False,2026,6,25
+49471,2026-06-25,Paraguay,Australia,0.0,0.0,FWC,Santa Clara,United States,True,2026,6,25
+49472,2026-06-25,Curaçao,Ivory Coast,0.0,2.0,FWC,Philadelphia,United States,True,2026,6,25
+49473,2026-06-25,Ecuador,Germany,2.0,1.0,FWC,East Rutherford,United States,True,2026,6,25
+49474,2026-06-25,Japan,Sweden,1.0,1.0,FWC,Arlington,United States,True,2026,6,25
+49475,2026-06-25,Tunisia,Netherlands,1.0,3.0,FWC,Kansas City,United States,True,2026,6,25
+49476,2026-06-26,Egypt,Iran,1.0,1.0,FWC,Seattle,United States,True,2026,6,26
+49477,2026-06-26,New Zealand,Belgium,1.0,5.0,FWC,Vancouver,Canada,True,2026,6,26
+49478,2026-06-26,Cape Verde,Saudi Arabia,0.0,0.0,FWC,Houston,United States,True,2026,6,26
+49479,2026-06-26,Uruguay,Spain,0.0,1.0,FWC,Zapopan,Mexico,True,2026,6,26
+49480,2026-06-26,Norway,France,1.0,4.0,FWC,Foxborough,United States,True,2026,6,26
+49481,2026-06-26,Senegal,Iraq,5.0,0.0,FWC,Toronto,Canada,True,2026,6,26
+49482,2026-06-27,Algeria,Austria,3.0,3.0,FWC,Kansas City,United States,True,2026,6,27
+49483,2026-06-27,Jordan,Argentina,1.0,3.0,FWC,Arlington,United States,True,2026,6,27
+49484,2026-06-27,Colombia,Portugal,0.0,0.0,FWC,Miami Gardens,United States,True,2026,6,27
+49485,2026-06-27,DR Congo,Uzbekistan,3.0,1.0,FWC,Atlanta,United States,True,2026,6,27
+49486,2026-06-27,Panama,England,0.0,2.0,FWC,East Rutherford,United States,True,2026,6,27
+49487,2026-06-27,Croatia,Ghana,2.0,1.0,FWC,Philadelphia,United States,True,2026,6,27
+49488,2026-06-28,South Africa,Canada,0.0,1.0,FWC,Inglewood,United States,True,2026,6,28
+49489,2026-06-29,Brazil,Japan,2.0,1.0,FWC,Houston,United States,True,2026,6,29
+49490,2026-06-29,Germany,Paraguay,1.0,1.0,FWC,Foxborough,United States,True,2026,6,29
+49491,2026-06-29,Netherlands,Morocco,1.0,1.0,FWC,Guadalupe,Mexico,True,2026,6,29
+49492,2026-06-30,Ivory Coast,Norway,1.0,2.0,FWC,Arlington,United States,True,2026,6,30
+49493,2026-06-30,France,Sweden,3.0,0.0,FWC,East Rutherford,United States,True,2026,6,30
+49494,2026-06-30,Mexico,Ecuador,2.0,0.0,FWC,Mexico City,Mexico,False,2026,6,30
+49495,2026-07-01,England,DR Congo,2.0,1.0,FWC,Atlanta,United States,True,2026,7,1
+49496,2026-07-01,Belgium,Senegal,3.0,2.0,FWC,Seattle,United States,True,2026,7,1
+49497,2026-07-01,United States,Bosnia and Herzegovina,2.0,0.0,FWC,Santa Clara,United States,False,2026,7,1
+49498,2026-07-02,Spain,Austria,3.0,0.0,FWC,Inglewood,United States,True,2026,7,2
+49499,2026-07-02,Portugal,Croatia,2.0,1.0,FWC,Toronto,Canada,True,2026,7,2
+49500,2026-07-02,Switzerland,Algeria,2.0,0.0,FWC,Vancouver,Canada,True,2026,7,2
+49501,2026-07-03,Australia,Egypt,1.0,1.0,FWC,Arlington,United States,True,2026,7,3
+49502,2026-07-03,Argentina,Cape Verde,3.0,2.0,FWC,Miami Gardens,United States,True,2026,7,3
+49503,2026-07-03,Colombia,Ghana,1.0,0.0,FWC,Kansas City,United States,True,2026,7,3
+49504,2026-07-04,Canada,Morocco,0.0,3.0,FWC,Houston,United States,True,2026,7,4
+49505,2026-07-04,Paraguay,France,0.0,1.0,FWC,Philadelphia,United States,True,2026,7,4
+49506,2026-07-05,Brazil,Norway,1.0,2.0,FWC,East Rutherford,United States,True,2026,7,5
+49507,2026-07-05,Mexico,England,2.0,3.0,FWC,Mexico City,Mexico,False,2026,7,5
+49508,2026-07-06,Portugal,Spain,0.0,1.0,FWC,Dallas,United States,True,2026,7,6
+49509,2026-07-06,United States,Belgium,1.0,4.0,FWC,Seattle,United States,False,2026,7,6
+49510,2026-07-07,Argentina,Egypt,3.0,2.0,FWC,Atlanta,United States,True,2026,7,7
+49511,2026-07-07,Switzerland,Colombia,0.0,0.0,FWC,Vancouver,Canada,True,2026,7,7
+49512,2026-07-09,France,Morocco,2.0,0.0,FWC,Foxborough,United States,True,2026,7,9
+49513,2026-07-10,Spain,Belgium,2.0,1.0,FWC,Inglewood,United States,True,2026,7,10
+49514,2026-07-11,Norway,England,1.0,2.0,FWC,Miami Gardens,United States,True,2026,7,11
+49515,2026-07-11,Argentina,Switzerland,3.0,1.0,FWC,Kansas City,United States,True,2026,7,11
+49516,2026-07-14,France,Spain,0.0,2.0,FWC,Arlington,United States,True,2026,7,14
+49517,2026-07-15,England,Argentina,1.0,2.0,FWC,Atlanta,United States,True,2026,7,15
