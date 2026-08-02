@@ -32,7 +32,7 @@ path = fsl.run(path, save_dir)
 
 # results = predict_proba(path)
 # print(results.to_string(index=False))
-df = pd.read_csv("/Users/ziadsamer/Projects/nations-matches-prediction/data/test/test.csv")
+df = pd.read_csv("/Users/ziadsamer/Projects/nations-matches-prediction/data/test/test.csv")[:5]
 y_true = np.select(
     [
         df['home_score'] > df['away_score'],

@@ -26,7 +26,7 @@ def predict(
 ) -> pd.DataFrame:
 
     df = pd.read_csv(path)
-    X = df.copy()
+    X = df.copy()[:5]
 
     model = joblib.load(MODEL_PATH)
     pred = model.predict(X)  

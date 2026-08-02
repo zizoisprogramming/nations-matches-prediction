@@ -1,0 +1,4 @@
+date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,year,month,day
+2024-06-21,Poland,Austria,1.0,3.0,EURO,Berlin,Germany,True,2024,6,21
+2024-06-21,Netherlands,France,0.0,0.0,EURO,Leipzig,Germany,True,2024,6,21
+2024-06-21,Slovakia,Ukraine,1.0,2.0,EURO,Düsseldorf,Germany,True,2024,6,21
