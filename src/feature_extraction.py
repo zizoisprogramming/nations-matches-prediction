@@ -45,7 +45,7 @@ class FeatureExtraction():
         self.team_ids = _load_cache(TEAM_IDS_PATH)
         self.ratings_cache = _load_cache(RATINGS_CACHE_PATH)
 
-    def _haversine(lat1, lon1, lat2, lon2):
+    def _haversine(self, lat1, lon1, lat2, lon2):
 
         lat1, lon1, lat2, lon2 = (
             np.radians(pd.to_numeric(v, errors="coerce")) for v in (lat1, lon1, lat2, lon2)
@@ -54,9 +54,10 @@ class FeatureExtraction():
         a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
         return 6371.0 * 2 * np.arcsin(np.sqrt(a))
 
-    def _get_capital(team_name: str, cache: dict) -> str | None:
+    def _get_capital(self, team_name: str, cache: dict) -> str | None:
         if team_name in cache:
             return cache[team_name]
+        print(f"{team_name} not found in cache")
         try:
             return CountryInfo(team_name).capital()
         except Exception as e:
@@ -65,8 +66,9 @@ class FeatureExtraction():
 
     def _geocode_place(self, place: str, cache: dict) -> tuple | None:
         if place in cache:
-            return tuple(cache[place]) if cache[place] else None
-        for attempt in range(5):
+            return tuple(cache[place]) 
+        print(f"{place} not found in cache")
+        for _ in range(5):
             try:
                 time.sleep(1.2)  # Nominatim ~1 req/sec
                 location = self._geolocator.geocode(place)
@@ -115,11 +117,12 @@ class FeatureExtraction():
 
 
 
-    def _fetch_weather(lat, lon, date: str, cache: dict) -> dict | None:
+    def _fetch_weather(self, lat, lon, date: str, cache: dict) -> dict | None:
         key = f"{lat}_{lon}_{date}"
         if key in cache:
             return cache[key]
-        for attempt in range(5):
+        print(f"{key} not found in cache")
+        for _ in range(5):
             try:
                 time.sleep(1.5)  # well under Open-Meteo's 600/min limit
                 r = requests.get(
@@ -176,7 +179,7 @@ class FeatureExtraction():
         return df
 
 
-    async def _make_browser_session():
+    async def _make_browser_session(self):
         playwright = await async_playwright().start()
         browser = await playwright.chromium.launch(headless=True)
         context = await browser.new_context(
@@ -196,7 +199,7 @@ class FeatureExtraction():
 
 
 
-    async def _search_team_id(page, team_name: str) -> int | None:
+    async def _search_team_id(self, page, team_name: str) -> int | None:
 
         url = f"https://www.sofascore.com/api/v1/search/all?q={team_name.replace(' ', '%20')}&page=0"
         data = await _api_get(page, url)
@@ -219,6 +222,7 @@ class FeatureExtraction():
     async def _get_team_id(self, page, team_name: str, team_ids: dict) -> int | None:
         if team_name in team_ids:
             return team_ids[team_name]
+        print(f"{team_name} not found in cache")
         team_id = await self._search_team_id(page, team_name)
         if team_id:
             team_ids[team_name] = team_id
@@ -226,7 +230,7 @@ class FeatureExtraction():
         return team_id
 
 
-    async def _fetch_recent_finished_events(page, team_id: int, before_ts: int, max_events=3, max_pages=3):
+    async def _fetch_recent_finished_events(self, page, team_id: int, before_ts: int, max_events=3, max_pages=3):
         events = []
         for page_num in range(max_pages):
             data = await _api_get(page, f"https://www.sofascore.com/api/v1/team/{team_id}/events/last/{page_num}")
@@ -244,9 +248,7 @@ class FeatureExtraction():
         events.sort(key=lambda e: e.get("startTimestamp", 0), reverse=True)
         return events[:max_events]
 
-
-
-    async def _lineup_stats(page, event: dict, team_id: int):
+    async def _lineup_stats(self, page, event: dict, team_id: int):
         home = event.get("homeTeam", {})
         if not event.get("hasEventPlayerStatistics", False):
             return {"rating": None, "shots": None, "shots_against": None}
@@ -283,8 +285,7 @@ class FeatureExtraction():
 
 
     async def _last_2_form_stats(self, page, team_id: int, before_ts: int, cache: dict) -> dict:
-        """Pulls last 3 finished matches, keeps the first 2 that have lineup data
-        (mirrors the _1/_2/_3 -> keep-best-2 cleanup done in feature-engineering.ipynb)."""
+
         events = await self._fetch_recent_finished_events(page, team_id, before_ts, max_events=3)
         ranking = None
         fixes, shots_against, rel_shots = [], [], []
@@ -294,6 +295,7 @@ class FeatureExtraction():
             if cache_key in cache:
                 stats = cache[cache_key]
             else:
+                print(f"{cache_key} not found in cache")
                 lineup = await self._lineup_stats(page, event, team_id)
                 stats = {
                     "rating": lineup["rating"],
@@ -331,9 +333,8 @@ class FeatureExtraction():
 
     async def _fetch_sofascore_features_async(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
-        
-
         playwright, browser, page = await self._make_browser_session()
+
         try:
             for idx, row in df.iterrows():
                 match_date = pd.to_datetime(row["date"]).date()
@@ -358,7 +359,7 @@ class FeatureExtraction():
         return asyncio.get_event_loop().run_until_complete(self._fetch_sofascore_features_async(df))
 
 
-    def _add_derived_features(df: pd.DataFrame) -> pd.DataFrame:
+    def _add_derived_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add engineered columns that may be absent from raw input."""
         df = df.copy()
 
@@ -395,14 +396,14 @@ class FeatureExtraction():
 
         return df
 
-    def _add_cyclic_features(df: pd.DataFrame) -> pd.DataFrame:
+    def _add_cyclic_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Cyclic encoding for day and month columns."""
         df = df.copy()
         df['day_sin'] = np.sin(2 * np.pi * df['day'] / 31)
         df['day_cos'] = np.cos(2 * np.pi * df['day'] / 31)
         df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
         df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
-        return df.drop(columns=['day', 'month'], errors='ignore')
+        return df.drop(columns=['day', 'month'], errors='ignore', index=False)
 
     def run(self, path, save_dir):
         df = pd.read_csv(path)
@@ -413,4 +414,6 @@ class FeatureExtraction():
         X = self._add_weather_features(X)
         X = self._add_sofascore_features(X)
         X = self._add_cyclic_features(X)
-        X.to_csv(f"{save_dir}/extracted.csv")
+        X = self._add_derived_features(X)
+        X.to_csv(f"{save_dir}/extracted.csv", index=False)
+        return f"{save_dir}/extracted.csv"

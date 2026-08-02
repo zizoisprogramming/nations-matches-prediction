@@ -41,5 +41,6 @@ class FeatureScaling:
             raise ValueError("Input DataFrame is empty.")
         X = df.drop(columns=['result'], errors='ignore').copy()
         self.scale(X)
-        X.to_csv(f"{save_dir}/scaled.csv")
+        X.to_csv(f"{save_dir}/scaled.csv", index=False)
+        return f"{save_dir}/scaled.csv"
         

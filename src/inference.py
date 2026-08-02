@@ -21,15 +21,3 @@ def predict_proba(
         probs,
         columns=['prob_draw', 'prob_home_win', 'prob_away_win']
     )
-
-
-if __name__ == '__main__':
-    import sys
-    if len(sys.argv) < 2:
-        print("Usage: python pipeline.py <path_to_csv>")
-        print("CSV needs at minimum: home_team, away_team, city, country, date")
-        sys.exit(1)
-
-    raw = pd.read_csv(sys.argv[1])
-    results = predict_proba(raw)
-    print(results.to_string(index=False))
