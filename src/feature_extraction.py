@@ -80,9 +80,7 @@ class FeatureExtraction():
                 time.sleep(60)
             except Exception:
                 time.sleep(5)
-        cache[place] = None
-        _save_cache(COORDS_CACHE_PATH, cache)
-        return None
+        raise Exception(f"Couldn't get geocode for {place}")
 
     def _add_location_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Geocode home/away capitals + stadium city; add lat/lon and away_stadium_distance_km."""
@@ -150,9 +148,7 @@ class FeatureExtraction():
                 return result
             except Exception:
                 time.sleep(5)
-        cache[key] = None
-        _save_cache(WEATHER_CACHE_PATH, cache)
-        return None
+        raise Exception(f"Couldn't find weather fot {lat, lon, date}")
 
 
     def _add_weather_features(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -204,7 +200,7 @@ class FeatureExtraction():
         url = f"https://www.sofascore.com/api/v1/search/all?q={team_name.replace(' ', '%20')}&page=0"
         data = await _api_get(page, url)
         if not data:
-            return None
+            raise Exception(f"Couldn't get team id for {team_name}")
         for r in data.get("results", []):
             if r.get("type") != "team":
                 continue
@@ -216,7 +212,7 @@ class FeatureExtraction():
         for r in data.get("results", []):
             if r.get("type") == "team" and r["entity"].get("sport", {}).get("slug") == "football":
                 return r["entity"]["id"]
-        return None
+        raise Exception(f"Couldn't get team id for {team_name}")
 
 
     async def _get_team_id(self, page, team_name: str, team_ids: dict) -> int | None:
@@ -406,14 +402,17 @@ class FeatureExtraction():
         return df.drop(columns=['day', 'month'], errors='ignore', index=False)
 
     def run(self, path, save_dir):
-        df = pd.read_csv(path)
-        if df.empty:
-            raise ValueError("Input DataFrame is empty.")
-        X = df.drop(columns=['result'], errors='ignore').copy()
-        X = self._add_location_features(X)
-        X = self._add_weather_features(X)
-        X = self._add_sofascore_features(X)
-        X = self._add_cyclic_features(X)
-        X = self._add_derived_features(X)
-        X.to_csv(f"{save_dir}/extracted.csv", index=False)
-        return f"{save_dir}/extracted.csv"
+        try:
+            df = pd.read_csv(path)
+            if df.empty:
+                raise ValueError("Input DataFrame is empty.")
+            X = df.drop(columns=['result'], errors='ignore').copy()
+            X = self._add_location_features(X)
+            X = self._add_weather_features(X)
+            X = self._add_sofascore_features(X)
+            X = self._add_cyclic_features(X)
+            X = self._add_derived_features(X)
+            X.to_csv(f"{save_dir}/extracted.csv", index=False)
+            return f"{save_dir}/extracted.csv"
+        except Exception as e:
+            raise e
