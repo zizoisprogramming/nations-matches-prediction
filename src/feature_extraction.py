@@ -18,7 +18,7 @@ from playwright.async_api import async_playwright
 
 from src.helpers.cache import _load_cache, _save_cache
 from src.helpers.apis import _api_get
-from src.helpers.helpers import _safe_ratio
+from src.helpers.helpers import _safe_ratio, slim_event
 
 nest_asyncio.apply()
 
@@ -27,10 +27,13 @@ BASE_DIR = Path(__file__).parent.parent
 
 CACHE_DIR = BASE_DIR / "data" / "cache"
 COORDS_CACHE_PATH = CACHE_DIR / "coords_cache.json"
+EVENTS_CACHE_PATH = CACHE_DIR / "team_events.json"
 WEATHER_CACHE_PATH = CACHE_DIR / "weather_cache.json"
 RATINGS_CACHE_PATH = CACHE_DIR / "ratings_cache.json"
 CAPITALS_CACHE_PATH = CACHE_DIR / "capitals_cache.json"
 TEAM_IDS_PATH = CACHE_DIR / "team_ids.json"
+
+N_MATCHES = 2
 
 class FeatureExtraction():
 
@@ -44,6 +47,7 @@ class FeatureExtraction():
         self.capitals_cache = _load_cache(CAPITALS_CACHE_PATH)
         self.team_ids = _load_cache(TEAM_IDS_PATH)
         self.ratings_cache = _load_cache(RATINGS_CACHE_PATH)
+        self.events_cache = _load_cache(EVENTS_CACHE_PATH)
 
     def _haversine(self, lat1, lon1, lat2, lon2):
 
@@ -59,7 +63,9 @@ class FeatureExtraction():
             return cache[team_name]
         print(f"{team_name} not found in cache")
         try:
-            return CountryInfo(team_name).capital()
+            cache[team_name] = CountryInfo(team_name).capital()
+            _save_cache(CAPITALS_CACHE_PATH, cache)
+            return cache[team_name]
         except Exception as e:
             raise e
 
@@ -107,10 +113,6 @@ class FeatureExtraction():
         df["away_lat"], df["away_lon"] = _geocode_list(away_places)
         df["stadium_lat"], df["stadium_lon"] = _geocode_list(stadium_places)
 
-        if "away_stadium_distance_km" not in df.columns:
-            df["away_stadium_distance_km"] = self._haversine(
-                df["away_lat"], df["away_lon"], df["stadium_lat"], df["stadium_lon"]
-            )
         return df
 
 
@@ -162,20 +164,27 @@ class FeatureExtraction():
             ("away", "away_lat", "away_lon"),
             ("stadium", "stadium_lat", "stadium_lon"),
         ]:
-            temp_max, temp_min, wind = [], [], []
+            temp_max, temp_min, wind, precipitation = [], [], [], []
             for lat, lon, date in zip(df[lat_col], df[lon_col], match_date):
                 w = self._fetch_weather(lat, lon, date, cache) if pd.notna(lat) and pd.notna(lon) else None
+                if not w:
+                    raise Exception(f"Couldn't find weather for {lat, lon, date}")
+                
                 temp_max.append(w["temperature_max"] if w else np.nan)
                 temp_min.append(w["temperature_min"] if w else np.nan)
                 wind.append(w["wind_speed"] if w else np.nan)
+                precipitation.append(w["precipitation"] if w else np.nan)
+
             df[f"{prefix}_temperature_max"] = temp_max
             df[f"{prefix}_temperature_min"] = temp_min
             df[f"{prefix}_wind_speed"] = wind
+            df[f"{prefix}_precipitation"] = precipitation
 
         return df
 
 
     async def _make_browser_session(self):
+        
         playwright = await async_playwright().start()
         browser = await playwright.chromium.launch(headless=True)
         context = await browser.new_context(
@@ -209,9 +218,9 @@ class FeatureExtraction():
                 continue
             if entity.get("national") and team_name.lower() in entity.get("name", "").lower():
                 return entity["id"]
-        for r in data.get("results", []):
-            if r.get("type") == "team" and r["entity"].get("sport", {}).get("slug") == "football":
-                return r["entity"]["id"]
+        # for r in data.get("results", []):
+        #     if r.get("type") == "team" and r["entity"].get("sport", {}).get("slug") == "football":
+        #         return r["entity"]["id"]
         raise Exception(f"Couldn't get team id for {team_name}")
 
 
@@ -226,35 +235,63 @@ class FeatureExtraction():
         return team_id
 
 
-    async def _fetch_recent_finished_events(self, page, team_id: int, before_ts: int, max_events=3, max_pages=3):
-        events = []
+    async def _fetch_recent_finished_events(self, team_id: int, before_ts: int):
+        if f"{team_id}" not in self.events_cache:
+            raise Exception(f"Couldn't find events for {team_id}")
+        events = self.events_cache[f"{team_id}"]
+        new_events = []
+
+        for e in events:
+            if e["startTimestamp"] < before_ts:
+                new_events.append(e)
+
+        new_events.sort(key=lambda e: e.get("startTimestamp", 0), reverse=True)
+        return new_events[:N_MATCHES]
+
+    async def _fetch_finished_events_till_overlap(self, page, team_id: int, max_pages=10):
+
+        if f"{team_id}" in self.events_cache:
+            events = self.events_cache[f"{team_id}"]
+        else:
+            events = []
+
+        cached_ids = {e.get("id") for e in events}
+        overlap = False
         for page_num in range(max_pages):
             data = await _api_get(page, f"https://www.sofascore.com/api/v1/team/{team_id}/events/last/{page_num}")
-            await asyncio.sleep(0.8)
+            await asyncio.sleep(1.2)
             if not data:
                 break
+
             for e in data.get("events", []):
-                if e.get("status", {}).get("type") != "finished":
+                new_event = slim_event(e)
+                
+                if new_event.get("id") in cached_ids:
+                    overlap = True
                     continue
-                if e.get("startTimestamp", 0) >= before_ts:
-                    continue
-                events.append(e)
-            if len(events) >= max_events or not data.get("hasNextPage", False):
+
+                if new_event["status"] == "finished" and new_event["hasStats"]:
+                    events.append(new_event)
+                
+            if not data.get("hasNextPage", False) or overlap:
                 break
+
         events.sort(key=lambda e: e.get("startTimestamp", 0), reverse=True)
-        return events[:max_events]
-
+        self.events_cache[f"{team_id}"] = events
+        _save_cache(EVENTS_CACHE_PATH, self.events_cache)
+    
     async def _lineup_stats(self, page, event: dict, team_id: int):
-        home = event.get("homeTeam", {})
-        if not event.get("hasEventPlayerStatistics", False):
-            return {"rating": None, "shots": None, "shots_against": None}
+        if not event.get("hasStats", False):
+            return {"rating": None, "shots": None, "scored": None, "shots_against": None}
         data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups")
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.2)
         if not data:
-            return {"rating": None, "shots": None, "shots_against": None}
+            return {"rating": None, "shots": None, "scored": None, "shots_against": None}
 
-        our_side = "home" if home.get("id") == team_id else "away"
+        our_side = "home" if event.get("homeTeamId") == team_id else "away"
         opp_side = "away" if our_side == "home" else "home"
+
+        scored = event.get("homeScore") if our_side == "home" else event.get("awayScore")
 
         def extract(side):
             players = data.get(side, {}).get("players", [])
@@ -271,76 +308,105 @@ class FeatureExtraction():
                             ratings.append(r)
                     except Exception:
                         pass
-                shots += stats.get("totalShots", 0) or 0
+                shots += stats.get("totalShots") or 0
             avg = round(sum(ratings) / len(ratings), 3) if ratings else None
-            return avg, (shots if shots > 0 else None)
+            return avg, (shots)
 
         our_rating, our_shots = extract(our_side)
         _, opp_shots = extract(opp_side)
-        return {"rating": our_rating, "shots": our_shots, "shots_against": opp_shots}
+        return {"rating": our_rating, "shots": our_shots, "scored": scored, "shots_against": opp_shots}
 
 
-    async def _last_2_form_stats(self, page, team_id: int, before_ts: int, cache: dict) -> dict:
+    async def _last_n_form_stats(self, page, team_id: int, before_ts: int, cache: dict, mode="no-pull") -> dict:
 
-        events = await self._fetch_recent_finished_events(page, team_id, before_ts, max_events=3)
+        if mode == "pull" or f"{team_id}" not in self.events_cache:
+            await self._fetch_finished_events_till_overlap(page, team_id)
+
+        events = await self._fetch_recent_finished_events(team_id, before_ts)
+
         ranking = None
-        fixes, shots_against, rel_shots = [], [], []
+        fixes, shots, scored, shots_against, rel_shots = [], [], [], [], []
 
-        for event in events:
-            cache_key = f"{event['id']}_{team_id}"
-            if cache_key in cache:
-                stats = cache[cache_key]
-            else:
-                print(f"{cache_key} not found in cache")
+        cache_key = f"{team_id}_{before_ts}"
+        if cache_key in cache:
+            stats = cache[cache_key]
+            fixes = stats["fix"]
+            shots = stats["shots"]
+            scored = stats["scored"]
+            shots_against = stats["shots_against"]
+            rel_shots = stats["relative_shots"]
+            ranking = stats["ranking"]
+        else:
+            print(f"{cache_key} not found in cache")
+
+            for event in events:
+                
                 lineup = await self._lineup_stats(page, event, team_id)
+                
                 stats = {
-                    "rating": lineup["rating"],
+                    "fix": lineup["rating"],
                     "shots_against": lineup["shots_against"],
+                    "shots": lineup["shots"],
+                    "scored": lineup["scored"],
                     "relative_shots": _safe_ratio(lineup["shots"], lineup["shots_against"]),
                 }
-                cache[cache_key] = stats
-                _save_cache(RATINGS_CACHE_PATH, cache)
 
-            if ranking is None:
-                home = event.get("homeTeam", {})
-                ranking = home.get("ranking") if home.get("id") == team_id else event.get("awayTeam", {}).get("ranking")
+                if ranking is None:
+                    ranking = event.get("homeRanking") if event.get("homeTeamId") == team_id else event.get("awayRanking")
 
-            fixes.append(stats["rating"])
-            shots_against.append(stats["shots_against"])
-            rel_shots.append(stats["relative_shots"])
+                fixes.append(stats["fix"])
+                shots.append(stats["shots"])
+                scored.append(stats["scored"])
+                shots_against.append(stats["shots_against"])
+                rel_shots.append(stats["relative_shots"])
+                
+            cache[cache_key] = {
+                "fix": fixes,
+                "shots_against": shots_against,
+                "shots": shots,
+                "scored": scored,
+                "relative_shots": rel_shots
+            }
 
-        keep_idx = [i for i, v in enumerate(fixes) if v is not None][:2]
-        if len(keep_idx) < 2:
-            keep_idx = list(range(min(2, len(fixes))))
-        while len(keep_idx) < 2:
+            _save_cache(RATINGS_CACHE_PATH, cache)
+
+        keep_idx = [i for i, v in enumerate(fixes) if v is not None][:N_MATCHES]
+        if len(keep_idx) < N_MATCHES:
+            remaining = [i for i in range(len(fixes)) if i not in keep_idx]
+            keep_idx.extend(remaining[:N_MATCHES - len(keep_idx)])
+        while len(keep_idx) < N_MATCHES:
             keep_idx.append(None)
 
         def pick(values):
             return [values[i] if i is not None and i < len(values) else None for i in keep_idx]
 
-        fx, sa, rs = pick(fixes), pick(shots_against), pick(rel_shots)
-        return {
-            "fix_1": fx[0], "fix_2": fx[1],
-            "shots_against_1": sa[0], "shots_against_2": sa[1],
-            "relative_shots_1": rs[0], "relative_shots_2": rs[1],
-            "ranking": ranking,
-        }
+        fx, sh, sc, sa, rs = pick(fixes), pick(shots), pick(scored), pick(shots_against), pick(rel_shots)
+        to_return_obj = {}
+        to_return_obj["ranking"] = ranking
+        for i in range(len(fx)):
+            to_return_obj[f"fix_{i + 1}"] = fx[i]
+            to_return_obj[f"shots_{i + 1}"] = sh[i]
+            to_return_obj[f"scored_{i + 1}"] = sc[i]
+            to_return_obj[f"shots_against_{i + 1}"] = sa[i]
+            to_return_obj[f"relative_shots_{i + 1}"] = rs[i]
+
+        return to_return_obj
 
 
     async def _fetch_sofascore_features_async(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
         playwright, browser, page = await self._make_browser_session()
-
+        
         try:
             for idx, row in df.iterrows():
                 match_date = pd.to_datetime(row["date"]).date()
                 before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day).timestamp())
-
+                
                 for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
                     team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
                     if team_id is None:
                         continue
-                    stats = await self._last_2_form_stats(page, team_id, before_ts, self.ratings_cache)
+                    stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
                     for k, v in stats.items():
                         col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
                         df.at[idx, col_name] = v
@@ -359,6 +425,20 @@ class FeatureExtraction():
         """Add engineered columns that may be absent from raw input."""
         df = df.copy()
 
+        if 'home_stadium_distance_km' not in df.columns:
+            df['home_stadium_distance_km'] = self._haversine(
+                df["home_lat"],
+                df["home_lon"],
+                df["stadium_lat"],
+                df["stadium_lon"],
+            )
+        if 'away_stadium_distance_km' not in df.columns:
+            df['away_stadium_distance_km'] = self._haversine(
+                df["away_lat"],
+                df["away_lon"],
+                df["stadium_lat"],
+                df["stadium_lon"],
+            )
         if 'home_stadium_wind_speed' not in df.columns:
             df['home_stadium_wind_speed'] = np.abs(
                 df['home_wind_speed'] - df['stadium_wind_speed']
@@ -392,15 +472,6 @@ class FeatureExtraction():
 
         return df
 
-    def _add_cyclic_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Cyclic encoding for day and month columns."""
-        df = df.copy()
-        df['day_sin'] = np.sin(2 * np.pi * df['day'] / 31)
-        df['day_cos'] = np.cos(2 * np.pi * df['day'] / 31)
-        df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
-        df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
-        return df.drop(columns=['day', 'month'], errors='ignore', index=False)
-
     def run(self, path, save_dir):
         try:
             df = pd.read_csv(path)
@@ -410,7 +481,6 @@ class FeatureExtraction():
             X = self._add_location_features(X)
             X = self._add_weather_features(X)
             X = self._add_sofascore_features(X)
-            X = self._add_cyclic_features(X)
             X = self._add_derived_features(X)
             X.to_csv(f"{save_dir}/extracted.csv", index=False)
             return f"{save_dir}/extracted.csv"
