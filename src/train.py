@@ -99,7 +99,7 @@ grid = GridSearchCV(
     n_jobs=-1
 )
 
-grid.fit(X, y)
+grid.fit(X, y, sample_weight=sample_weights)
 
 best_model = grid.best_estimator_
 

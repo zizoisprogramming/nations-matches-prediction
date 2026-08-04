@@ -5,9 +5,16 @@ import time
 import pandas as pd
 from playwright.sync_api import sync_playwright
 from difflib import SequenceMatcher
+from pathlib import Path
 import re
 from time import sleep
 import datetime
+
+from src.helpers.helpers import check_new
+from src.helpers.constants import REQ_TO_TRAIN, DATA_PATH, NEW_DATA_PATH, TEST_DATA_PATH
+
+
+
 
 TARGET_COMPETITIONS = [
     "CAF Africa Cup of Nations", "UEFA European Championship", "FIFA World Cup",
@@ -441,6 +448,28 @@ def main():
     parser = argparse.ArgumentParser(description="Scrape FIFA Match Centre for a specific date")
     parser.add_argument("mode", help="Weekly, monthly or daily")
     args = parser.parse_args()
+    if not mode in ["weekly", "monthly", "daily"]:
+        print("Mode must be one of: weekly, monthly or daily")
+        return
+
+    df = pd.read_csv(DATA_PATH).drop_duplicates()
+    test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()
+
+    if len(df) >= REQ_TO_TRAIN:
+        n_from_df = int(0.7 * REQ_TO_TRAIN)
+        n_from_test = int(0.3 * REQ_TO_TRAIN)
+
+        df_new = df.iloc[:n_from_df]
+        df_rest = df.iloc[n_from_df:]
+
+        test_new = test_df.iloc[:n_from_test]
+        test_rest = test_df.iloc[n_from_test:]
+
+        new_data = pd.concat([df_new, test_new], ignore_index=True)
+        new_data.to_csv(NEW_DATA_PATH, index=False)
+
+        updated_test_df = pd.concat([test_rest, df_rest], ignore_index=True)
+        updated_test_df.to_csv(TEST_DATA_PATH, index=False)
 
     mode = args.mode
     full_matches = []
@@ -459,6 +488,8 @@ def main():
     for _ in range(span):
         date_str = date.strftime("%Y-%m-%d")
         matches = with_retries(scrape_fifa_matches, date_str, site_key="fifa", max_retries=4, base_delay=8.0)
+        if not matches:
+            continue
         for match in matches:
             post_scrape(match)
 
@@ -474,16 +505,16 @@ def main():
         print("\nNo matches found.")
         sys.exit(0)
 
-    print(f"\n{'='*60}")
     print(f"  FIFA Matches for {mode}")
     print(f"{'='*60}")
     for m in full_matches:
         score_line = f"{m['home_score']} - {m['away_score']}" if m['home_score'] else "vs"
-        print(f"\n  Match :{m['home_team']} {score_line} {m['away_team']}")
+        print(f"\n  Match: {m['home_team']} {score_line} {m['away_team']}")
         print("Date: ", m['date'])
         print(f"{m['tournament']} - {m['city']}, {m['country']}")
     print(f"\n{'='*60}")
 
+    df = pd.concat([df, pd.DataFrame([m for m in full_matches])], ignore_index=True)
 
 if __name__ == "__main__":
     main()
