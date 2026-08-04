@@ -7,26 +7,35 @@ from playwright.sync_api import sync_playwright
 from difflib import SequenceMatcher
 import re
 from time import sleep
+import datetime
 
 TARGET_COMPETITIONS = [
     "CAF Africa Cup of Nations", "UEFA European Championship", "FIFA World Cup",
     "CONMEBOL Copa America", "UEFA Nations League", "AFC Asian Cup", "Concacaf Nations League"
 ]
 
-# --- Rate limiting / anti-block helpers -------------------------------------
 
-# Minimum seconds between two consecutive requests to the *same* site.
 MIN_REQUEST_INTERVAL = {
     "fifa": 3.0,
-    "espn": 5.0,   # ESPN's robots.txt disallows this path -> be more conservative
+    "espn": 5.0,   
 }
 
-# Tracks the last time we hit each site, so back-to-back calls (e.g. looping
-# over many dates) don't hammer the server.
+US_STATES = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+    "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+    "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+    "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
+    "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+    "Washington D.C."
+]
+
 _last_request_time = {"fifa": 0.0, "espn": 0.0}
 
-# A small pool of realistic desktop user agents to rotate through, so every
-# request doesn't look identical.
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
@@ -48,10 +57,7 @@ def _random_user_agent() -> str:
     return random.choice(USER_AGENTS)
 
 
-# <title> text used by common bot-check/challenge pages (Cloudflare, Akamai,
-# PerimeterX, etc). Checking the *title* instead of the whole page body avoids
-# false positives from unrelated words ("blocked", "unusual") appearing
-# somewhere in normal page content (ads, footers, cookie banners...).
+
 CHALLENGE_TITLE_MARKERS = [
     "just a moment", "attention required", "are you a robot", "access denied",
     "please verify you are a human", "checking your browser", "request unsuccessful",
@@ -126,6 +132,13 @@ def is_target_competition(name: str) -> bool:
 
     return False
 
+def is_usa_location(location: str) -> bool:
+    location = location.lower()
+    for state in US_STATES:
+        if _text_similarity(location, state.lower()) > 0.9:
+            return True
+
+    return False
 
 def scrape_fifa_matches(date_str: str):
     """
@@ -351,6 +364,10 @@ def scrape_espn(date_str: str):
                             att_el = row.query_selector('td[class*="attendance__col"]')
                             attendance = att_el.inner_text().strip() if att_el else ""
 
+                            if is_usa_location(region):
+                                city = region
+                                region = "United States"
+
                             matches.append({
                                 "home_team": home_name,
                                 "away_team": away_name,
@@ -422,28 +439,43 @@ def post_scrape(data: dict):
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape FIFA Match Centre for a specific date")
-    parser.add_argument("date", help="Date in YYYY-MM-DD format")
+    parser.add_argument("mode", help="Weekly, monthly or daily")
     args = parser.parse_args()
 
-    matches = with_retries(scrape_fifa_matches, args.date, site_key="fifa", max_retries=4, base_delay=8.0)
-    for match in matches:
-        post_scrape(match)
+    mode = args.mode
+    full_matches = []
+    span_dict = {
+        "weekly": 7,
+        "monthly": 31,
+        "daily": 1
+    }
+    try:
+        span = span_dict[mode]
+    except KeyError:
+        print(f"Mode {mode} not supported")
+        sys.exit(1)
+
+    date = datetime.date.today() 
+    for _ in range(span):
+        date_str = date.strftime("%Y-%m-%d")
+        matches = with_retries(scrape_fifa_matches, date_str, site_key="fifa", max_retries=4, base_delay=8.0)
+        for match in matches:
+            post_scrape(match)
+
+        espn_matches = with_retries(scrape_espn, date_str, site_key="espn", max_retries=4, base_delay=10.0)
+        for match in matches:
+            target = find_espn_match(date_str, match, espn_matches)
+            if target is not None:
+                post_scrape(target)
+                full_matches.append(target)
+        date -= datetime.timedelta(days=1)
 
     if not matches:
         print("\nNo matches found.")
         sys.exit(0)
 
-    espn_matches = with_retries(scrape_espn, args.date, site_key="espn", max_retries=4, base_delay=10.0)
-    full_matches = []
-    for match in matches:
-        target = find_espn_match(args.date, match, espn_matches)
-        if target is not None:
-            post_scrape(target)
-            full_matches.append(target)
-
-
     print(f"\n{'='*60}")
-    print(f"  FIFA Matches for {args.date}")
+    print(f"  FIFA Matches for {mode}")
     print(f"{'='*60}")
     for m in full_matches:
         score_line = f"{m['home_score']} - {m['away_score']}" if m['home_score'] else "vs"
