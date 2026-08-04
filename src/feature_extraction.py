@@ -282,16 +282,17 @@ class FeatureExtraction():
     
     async def _lineup_stats(self, page, event: dict, team_id: int):
         if not event.get("hasStats", False):
-            return {"rating": None, "shots": None, "scored": None, "shots_against": None}
+            return {"rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
         data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups")
         await asyncio.sleep(1.2)
         if not data:
-            return {"rating": None, "shots": None, "scored": None, "shots_against": None}
+            return {"rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
 
         our_side = "home" if event.get("homeTeamId") == team_id else "away"
         opp_side = "away" if our_side == "home" else "home"
 
         scored = event.get("homeScore") if our_side == "home" else event.get("awayScore")
+        scored_against = event.get("homeScore") if our_side == "away" else event.get("awayScore")
 
         def extract(side):
             players = data.get(side, {}).get("players", [])
@@ -314,7 +315,7 @@ class FeatureExtraction():
 
         our_rating, our_shots = extract(our_side)
         _, opp_shots = extract(opp_side)
-        return {"rating": our_rating, "shots": our_shots, "scored": scored, "shots_against": opp_shots}
+        return {"rating": our_rating, "shots": our_shots, "scored": scored, "scored_against": scored_against, "shots_against": opp_shots}
 
 
     async def _last_n_form_stats(self, page, team_id: int, before_ts: int, cache: dict, mode="no-pull") -> dict:
@@ -325,7 +326,7 @@ class FeatureExtraction():
         events = await self._fetch_recent_finished_events(team_id, before_ts)
 
         ranking = None
-        fixes, shots, scored, shots_against, rel_shots = [], [], [], [], []
+        fixes, shots, scored, shots_against, rel_shots, rel_goals = [], [], [], [], [], []
 
         cache_key = f"{team_id}_{before_ts}"
         if cache_key in cache:
@@ -335,6 +336,7 @@ class FeatureExtraction():
             scored = stats["scored"]
             shots_against = stats["shots_against"]
             rel_shots = stats["relative_shots"]
+            rel_goals = stats["relative_goals"]
             ranking = stats["ranking"]
         else:
             print(f"{cache_key} not found in cache")
@@ -349,6 +351,7 @@ class FeatureExtraction():
                     "shots": lineup["shots"],
                     "scored": lineup["scored"],
                     "relative_shots": _safe_ratio(lineup["shots"], lineup["shots_against"]),
+                    "relative_goals": _safe_ratio(lineup["scored"], lineup["scored_against"]),
                 }
 
                 if ranking is None:
@@ -359,13 +362,15 @@ class FeatureExtraction():
                 scored.append(stats["scored"])
                 shots_against.append(stats["shots_against"])
                 rel_shots.append(stats["relative_shots"])
+                rel_goals.append(stats["relative_goals"])
                 
             cache[cache_key] = {
                 "fix": fixes,
                 "shots_against": shots_against,
                 "shots": shots,
                 "scored": scored,
-                "relative_shots": rel_shots
+                "relative_shots": rel_shots,
+                "relative_goals": rel_goals
             }
 
             _save_cache(RATINGS_CACHE_PATH, cache)
@@ -380,7 +385,7 @@ class FeatureExtraction():
         def pick(values):
             return [values[i] if i is not None and i < len(values) else None for i in keep_idx]
 
-        fx, sh, sc, sa, rs = pick(fixes), pick(shots), pick(scored), pick(shots_against), pick(rel_shots)
+        fx, sh, sc, sa, rs, rg = pick(fixes), pick(shots), pick(scored), pick(shots_against), pick(rel_shots), pick(rel_goals)
         to_return_obj = {}
         to_return_obj["ranking"] = ranking
         for i in range(len(fx)):
@@ -389,6 +394,7 @@ class FeatureExtraction():
             to_return_obj[f"scored_{i + 1}"] = sc[i]
             to_return_obj[f"shots_against_{i + 1}"] = sa[i]
             to_return_obj[f"relative_shots_{i + 1}"] = rs[i]
+            to_return_obj[f"relative_goals_{i + 1}"] = rg[i]
 
         return to_return_obj
 
