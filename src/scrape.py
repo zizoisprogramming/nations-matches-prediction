@@ -524,6 +524,7 @@ def main():
     print(f"\n{'='*60}")
 
     df = pd.concat([df, pd.DataFrame([m for m in full_matches])], ignore_index=True)
+    df.to_csv(DATA_PATH, index=False)
 
 if __name__ == "__main__":
     main()
