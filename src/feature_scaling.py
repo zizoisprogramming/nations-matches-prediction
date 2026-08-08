@@ -1,4 +1,5 @@
 import joblib
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -64,12 +65,10 @@ class FeatureScaling:
             df['day_cos'] = np.cos(2 * np.pi * df['day'] / 31)
     
             return df.drop(columns=['day'], errors='ignore')
-
     
     def scale(self, X):
         cols_to_scale = [c for c in SCALE_COLS if c in X.columns]
         X[cols_to_scale] = self.scaler.transform(X[cols_to_scale])
-
 
     def run(self, path, save_dir):
         
@@ -81,4 +80,12 @@ class FeatureScaling:
         self.scale(X)
         X.to_csv(f"{save_dir}/scaled.csv", index=False)
         return f"{save_dir}/scaled.csv"
-        
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("save_dir")
+
+    args = parser.parse_args()
+    save_dir = args.save_dir
+    fs = FeatureScaling()
+    fs.run(save_dir + "/selected.csv", save_dir)

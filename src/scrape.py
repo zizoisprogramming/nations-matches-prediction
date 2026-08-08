@@ -5,16 +5,12 @@ import time
 import pandas as pd
 from playwright.sync_api import sync_playwright
 from difflib import SequenceMatcher
-from pathlib import Path
+import numpy as np
 import re
 from time import sleep
 import datetime
 
-from src.helpers.helpers import check_new
 from src.helpers.constants import REQ_TO_TRAIN, DATA_PATH, NEW_DATA_PATH, TEST_DATA_PATH
-
-
-
 
 TARGET_COMPETITIONS = [
     "CAF Africa Cup of Nations", "UEFA European Championship", "FIFA World Cup",
@@ -444,6 +440,18 @@ def post_scrape(data: dict):
     data['month'] = ts.month
     data['day'] = ts.day
 
+def label_data(df: pd.DataFrame):
+    df['result'] = np.select(
+        [
+            df['home_score'] > df['away_score'],
+            df['home_score'] < df['away_score']
+        ],
+        [
+            1,  
+            2   
+        ],
+        default=0 
+    )
 def main():
     parser = argparse.ArgumentParser(description="Scrape FIFA Match Centre for a specific date")
     parser.add_argument("mode", help="Weekly, monthly or daily")
@@ -453,6 +461,7 @@ def main():
         return
 
     df = pd.read_csv(DATA_PATH).drop_duplicates()
+    label_data(df)
     test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()
 
     if len(df) >= REQ_TO_TRAIN:

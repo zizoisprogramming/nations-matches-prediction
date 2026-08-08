@@ -1,50 +1,18 @@
-
-
 import pandas as pd
-import numpy as np
-import os 
-from pathlib import Path
-import datetime as dt
-
+import argparse
 from sklearn.metrics import classification_report
-from src.feature_extraction import FeatureExtraction
-from src.feature_scaling import FeatureScaling
-from src.feature_selection import FeatureSelection
-from src.inference import predict_proba, predict
+from src.inference import predict
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("save_dir")
 
-path = "/Users/ziadsamer/Projects/nations-matches-prediction/data/test/test.csv"
-BASE_DIR = Path(__file__).parent.parent
-save_dir = BASE_DIR / "data" / str(dt.date.today())
-try:
-    os.makedirs(save_dir, exist_ok=True)
-except:
-    raise Exception("alao")
+    args = parser.parse_args()
+    save_dir = args.save_dir
 
-fe = FeatureExtraction()
-path = fe.run(path, save_dir)
+    og_test = "/".join(save_dir.split("/")[:-1])
+    df = pd.read_csv(og_test + "/test.csv")
+    y_true = df['result']
 
-fsl = FeatureSelection()
-path = fsl.run(path, save_dir)
-
-fsc = FeatureScaling()
-path = fsc.run(path, save_dir)
-
-
-# results = predict_proba(path)
-# print(results.to_string(index=False))
-df = pd.read_csv("/Users/ziadsamer/Projects/nations-matches-prediction/data/test/test.csv")
-y_true = np.select(
-    [
-        df['home_score'] > df['away_score'],
-        df['home_score'] < df['away_score']
-    ],
-    [
-        1,  
-        2   
-    ],
-    default=0 
-)
-
-y_pred = predict(path=path)
-print(classification_report(y_true, y_pred))
+    y_pred = predict(save_dir + "/scaled.csv")
+    print(classification_report(y_true, y_pred))

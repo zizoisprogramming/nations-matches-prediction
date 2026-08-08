@@ -5,6 +5,7 @@ import time
 import math
 import asyncio
 import nest_asyncio
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -16,9 +17,10 @@ from geopy.exc import GeocoderRateLimited
 from geopy.geocoders import Nominatim
 from playwright.async_api import async_playwright
 
-from src.helpers.cache import _load_cache, _save_cache
+from src.helpers.cache import load_cache, save_cache
 from src.helpers.apis import _api_get
 from src.helpers.helpers import _safe_ratio, slim_event
+from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH
 
 nest_asyncio.apply()
 
@@ -43,11 +45,11 @@ class FeatureExtraction():
             timeout=10
         )
 
-        self.coords_cache = _load_cache(COORDS_CACHE_PATH)
-        self.capitals_cache = _load_cache(CAPITALS_CACHE_PATH)
-        self.team_ids = _load_cache(TEAM_IDS_PATH)
-        self.ratings_cache = _load_cache(RATINGS_CACHE_PATH)
-        self.events_cache = _load_cache(EVENTS_CACHE_PATH)
+        self.coords_cache = load_cache(COORDS_CACHE_PATH)
+        self.capitals_cache = load_cache(CAPITALS_CACHE_PATH)
+        self.team_ids = load_cache(TEAM_IDS_PATH)
+        self.ratings_cache = load_cache(RATINGS_CACHE_PATH)
+        self.events_cache = load_cache(EVENTS_CACHE_PATH)
 
     def _haversine(self, lat1, lon1, lat2, lon2):
 
@@ -64,11 +66,10 @@ class FeatureExtraction():
         print(f"{team_name} not found in cache")
         try:
             cache[team_name] = CountryInfo(team_name).capital()
-            _save_cache(CAPITALS_CACHE_PATH, cache)
+            save_cache(CAPITALS_CACHE_PATH, cache)
             return cache[team_name]
         except Exception as e:
             raise e
-
 
     def _geocode_place(self, place: str, cache: dict) -> tuple | None:
         if place in cache:
@@ -80,7 +81,7 @@ class FeatureExtraction():
                 location = self._geolocator.geocode(place)
                 result = (location.latitude, location.longitude) if location else None
                 cache[place] = result
-                _save_cache(COORDS_CACHE_PATH, cache)
+                save_cache(COORDS_CACHE_PATH, cache)
                 return result
             except GeocoderRateLimited:
                 time.sleep(60)
@@ -115,8 +116,6 @@ class FeatureExtraction():
 
         return df
 
-
-
     def _fetch_weather(self, lat, lon, date: str, cache: dict) -> dict | None:
         key = f"{lat}_{lon}_{date}"
         if key in cache:
@@ -146,17 +145,16 @@ class FeatureExtraction():
                     "wind_speed": daily["wind_speed_10m_max"][0],
                 }
                 cache[key] = result
-                _save_cache(WEATHER_CACHE_PATH, cache)
+                save_cache(WEATHER_CACHE_PATH, cache)
                 return result
             except Exception:
                 time.sleep(5)
         raise Exception(f"Couldn't find weather fot {lat, lon, date}")
 
-
     def _add_weather_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Fetch historical weather for home/away capitals + stadium; add raw temp/wind columns."""
         df = df.copy()
-        cache = _load_cache(WEATHER_CACHE_PATH)
+        cache = load_cache(WEATHER_CACHE_PATH)
         match_date = pd.to_datetime(df["date"]).dt.date.astype(str)
 
         for prefix, lat_col, lon_col in [
@@ -182,7 +180,6 @@ class FeatureExtraction():
 
         return df
 
-
     async def _make_browser_session(self):
         
         playwright = await async_playwright().start()
@@ -201,8 +198,6 @@ class FeatureExtraction():
         await page.goto("https://www.sofascore.com/", wait_until="domcontentloaded")
         await asyncio.sleep(2)
         return playwright, browser, page
-
-
 
     async def _search_team_id(self, page, team_name: str) -> int | None:
 
@@ -223,7 +218,6 @@ class FeatureExtraction():
         #         return r["entity"]["id"]
         raise Exception(f"Couldn't get team id for {team_name}")
 
-
     async def _get_team_id(self, page, team_name: str, team_ids: dict) -> int | None:
         if team_name in team_ids:
             return team_ids[team_name]
@@ -231,7 +225,7 @@ class FeatureExtraction():
         team_id = await self._search_team_id(page, team_name)
         if team_id:
             team_ids[team_name] = team_id
-            _save_cache(TEAM_IDS_PATH, team_ids)
+            save_cache(TEAM_IDS_PATH, team_ids)
         return team_id
 
 
@@ -278,21 +272,22 @@ class FeatureExtraction():
 
         events.sort(key=lambda e: e.get("startTimestamp", 0), reverse=True)
         self.events_cache[f"{team_id}"] = events
-        _save_cache(EVENTS_CACHE_PATH, self.events_cache)
+        save_cache(EVENTS_CACHE_PATH, self.events_cache)
     
     async def _lineup_stats(self, page, event: dict, team_id: int):
         if not event.get("hasStats", False):
-            return {"rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
+            return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
         data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups")
         await asyncio.sleep(1.2)
         if not data:
-            return {"rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
+            return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
 
         our_side = "home" if event.get("homeTeamId") == team_id else "away"
         opp_side = "away" if our_side == "home" else "home"
 
         scored = event.get("homeScore") if our_side == "home" else event.get("awayScore")
         scored_against = event.get("homeScore") if our_side == "away" else event.get("awayScore")
+        ranking = event.get(f"{our_side}Ranking")
 
         def extract(side):
             players = data.get(side, {}).get("players", [])
@@ -315,8 +310,7 @@ class FeatureExtraction():
 
         our_rating, our_shots = extract(our_side)
         _, opp_shots = extract(opp_side)
-        return {"rating": our_rating, "shots": our_shots, "scored": scored, "scored_against": scored_against, "shots_against": opp_shots}
-
+        return {"ranking": ranking, "rating": our_rating, "shots": our_shots, "scored": scored, "scored_against": scored_against, "shots_against": opp_shots}
 
     async def _last_n_form_stats(self, page, team_id: int, before_ts: int, cache: dict, mode="no-pull") -> dict:
 
@@ -340,22 +334,20 @@ class FeatureExtraction():
             ranking = stats["ranking"]
         else:
             print(f"{cache_key} not found in cache")
-
+            done = 0
             for event in events:
                 
                 lineup = await self._lineup_stats(page, event, team_id)
-                
+                if any([v is None for _, v in lineup.items()]): continue
                 stats = {
                     "fix": lineup["rating"],
                     "shots_against": lineup["shots_against"],
                     "shots": lineup["shots"],
                     "scored": lineup["scored"],
+                    "ranking": lineup["ranking"],
                     "relative_shots": _safe_ratio(lineup["shots"], lineup["shots_against"]),
                     "relative_goals": _safe_ratio(lineup["scored"], lineup["scored_against"]),
                 }
-
-                if ranking is None:
-                    ranking = event.get("homeRanking") if event.get("homeTeamId") == team_id else event.get("awayRanking")
 
                 fixes.append(stats["fix"])
                 shots.append(stats["shots"])
@@ -363,47 +355,43 @@ class FeatureExtraction():
                 shots_against.append(stats["shots_against"])
                 rel_shots.append(stats["relative_shots"])
                 rel_goals.append(stats["relative_goals"])
-                
+                ranking = stats["ranking"]
+
+                done += 1
+                if done >= N_MATCHES: break
+            if done < N_MATCHES:
+                raise Exception(f"Couldn't find {N_MATCHES} matches for {team_id}")
+            
             cache[cache_key] = {
                 "fix": fixes,
                 "shots_against": shots_against,
                 "shots": shots,
                 "scored": scored,
                 "relative_shots": rel_shots,
-                "relative_goals": rel_goals
+                "relative_goals": rel_goals,
+                "ranking": ranking
             }
+            save_cache(RATINGS_CACHE_PATH, cache)
 
-            _save_cache(RATINGS_CACHE_PATH, cache)
 
-        keep_idx = [i for i, v in enumerate(fixes) if v is not None][:N_MATCHES]
-        if len(keep_idx) < N_MATCHES:
-            remaining = [i for i in range(len(fixes)) if i not in keep_idx]
-            keep_idx.extend(remaining[:N_MATCHES - len(keep_idx)])
-        while len(keep_idx) < N_MATCHES:
-            keep_idx.append(None)
-
-        def pick(values):
-            return [values[i] if i is not None and i < len(values) else None for i in keep_idx]
-
-        fx, sh, sc, sa, rs, rg = pick(fixes), pick(shots), pick(scored), pick(shots_against), pick(rel_shots), pick(rel_goals)
         to_return_obj = {}
         to_return_obj["ranking"] = ranking
-        for i in range(len(fx)):
-            to_return_obj[f"fix_{i + 1}"] = fx[i]
-            to_return_obj[f"shots_{i + 1}"] = sh[i]
-            to_return_obj[f"scored_{i + 1}"] = sc[i]
-            to_return_obj[f"shots_against_{i + 1}"] = sa[i]
-            to_return_obj[f"relative_shots_{i + 1}"] = rs[i]
-            to_return_obj[f"relative_goals_{i + 1}"] = rg[i]
+        for i in range(len(fixes)):
+            to_return_obj[f"fix_{i + 1}"] = fixes[i]
+            to_return_obj[f"shots_{i + 1}"] = shots[i]
+            to_return_obj[f"scored_{i + 1}"] = scored[i]
+            to_return_obj[f"shots_against_{i + 1}"] = shots_against[i]
+            to_return_obj[f"relative_shots_{i + 1}"] = rel_shots[i]
+            to_return_obj[f"relative_goals_{i + 1}"] = rel_goals[i]
 
         return to_return_obj
-
 
     async def _fetch_sofascore_features_async(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
         playwright, browser, page = await self._make_browser_session()
-        
+        to_drop = []
         try:
+            
             for idx, row in df.iterrows():
                 match_date = pd.to_datetime(row["date"]).date()
                 before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day).timestamp())
@@ -412,20 +400,26 @@ class FeatureExtraction():
                     team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
                     if team_id is None:
                         continue
-                    stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
-                    for k, v in stats.items():
-                        col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
-                        df.at[idx, col_name] = v
+                    try:
+                        stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
+                        for k, v in stats.items():
+                            col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
+                            df.at[idx, col_name] = v
+                    except Exception as e:
+                        print(e)
+                        to_drop.append(idx)
+
+            df = df.drop(index=to_drop).reset_index(drop=True)
+            with open("to_drop.json", "w") as f:
+                json.dump(to_drop, f)
         finally:
             await browser.close()
             await playwright.stop()
 
         return df
 
-
     def _add_sofascore_features(self, df: pd.DataFrame) -> pd.DataFrame:
         return asyncio.get_event_loop().run_until_complete(self._fetch_sofascore_features_async(df))
-
 
     def _add_derived_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add engineered columns that may be absent from raw input."""
@@ -492,3 +486,20 @@ class FeatureExtraction():
             return f"{save_dir}/extracted.csv"
         except Exception as e:
             raise e
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("save_dir")
+    parser.add_argument("mode")
+
+    args = parser.parse_args()
+    save_dir = args.save_dir
+    mode = args.mode
+
+    fe = FeatureExtraction()
+    if mode == "test":
+        fe.run(TEST_DATA_PATH, save_dir)
+    elif mode == "train":
+        fe.run(NEW_DATA_PATH, save_dir)
+    else:
+        raise Exception("Unknown mode")

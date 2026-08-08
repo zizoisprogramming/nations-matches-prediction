@@ -2,7 +2,7 @@
 from pathlib import Path
 import json
 
-def _load_cache(path: Path) -> dict:
+def load_cache(path: Path) -> dict:
     try:
         with open(path) as f:
             return json.load(f)
@@ -10,7 +10,7 @@ def _load_cache(path: Path) -> dict:
         return {}
 
 
-def _save_cache(path: Path, data: dict) -> None:
+def save_cache(path: Path, data: dict) -> None:
     with open(path, "w") as f:
         json.dump(data, f)
 

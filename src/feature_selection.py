@@ -1,5 +1,5 @@
 import pandas as pd
-
+import argparse
 
 SELECTED_FEATURES = [
     "home_stadium_distance_km",
@@ -61,4 +61,12 @@ class FeatureSelection:
         X = X[SELECTED_FEATURES]
         X.to_csv(f"{save_dir}/selected.csv", index=False)
         return f"{save_dir}/selected.csv"
-        
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("save_dir")
+
+    args = parser.parse_args()
+    save_dir = args.save_dir
+    fe = FeatureSelection()
+    fe.run(save_dir + "/extracted.csv", save_dir)
