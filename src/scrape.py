@@ -456,6 +456,7 @@ def main():
     parser = argparse.ArgumentParser(description="Scrape FIFA Match Centre for a specific date")
     parser.add_argument("mode", help="Weekly, monthly or daily")
     args = parser.parse_args()
+    mode = args.mode
     if not mode in ["weekly", "monthly", "daily"]:
         print("Mode must be one of: weekly, monthly or daily")
         return
@@ -483,7 +484,7 @@ def main():
         updated_test_df = pd.concat([test_rest, df_rest], ignore_index=True)
         updated_test_df.to_csv(TEST_DATA_PATH, index=False)
 
-    mode = args.mode
+    
     full_matches = []
     span_dict = {
         "weekly": 7,
