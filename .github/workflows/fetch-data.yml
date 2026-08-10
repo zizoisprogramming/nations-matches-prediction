@@ -1,4 +1,4 @@
-name: auto-train
+name: fetch-data
 
 on:
     schedule:
