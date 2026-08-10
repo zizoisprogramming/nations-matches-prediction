@@ -6,7 +6,7 @@ on:
     workflow_dispatch:
 
 jobs:
-  train:
+  scrape:
     runs-on: ubuntu-latest
 
     steps:
