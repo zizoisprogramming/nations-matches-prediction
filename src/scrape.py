@@ -94,7 +94,7 @@ def _check_response(response, site_key: str):
         raise RuntimeError(f"{site_key} returned HTTP {response.status} (likely rate-limited or blocked)")
 
 
-def with_retries(scrape_fn, *args, site_key: str, max_retries: int = 4, base_delay: float = 8.0, **kwargs):
+def with_retries(scrape_fn, *args, site_key: str, max_retries: int = 2, base_delay: float = 8.0, **kwargs):
     """
     Generic retry wrapper with exponential backoff + jitter for any scrape_* function.
 
@@ -501,6 +501,8 @@ def main():
     for _ in range(span):
         date_str = date.strftime("%Y-%m-%d")
         matches = with_retries(scrape_fifa_matches, date_str, site_key="fifa", max_retries=4, base_delay=8.0)
+        date -= datetime.timedelta(days=1)
+        
         if not matches:
             continue
         for match in matches:
@@ -512,8 +514,7 @@ def main():
             if target is not None:
                 post_scrape(target)
                 full_matches.append(target)
-        date -= datetime.timedelta(days=1)
-
+        
     if not matches:
         print("\nNo matches found.")
         sys.exit(0)
