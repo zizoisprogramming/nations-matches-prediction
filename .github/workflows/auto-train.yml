@@ -21,6 +21,15 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
+    
+      - name: Run Feature Extraction
+        run: make feature-extraction
+
+      - name: Run Feature Selection
+        run: make feature_selection
+
+      - name: Run Scaling
+        run: make feature_scaling
 
       - name: Run train
         run: make train
