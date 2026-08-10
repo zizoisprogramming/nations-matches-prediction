@@ -477,7 +477,10 @@ class FeatureExtraction():
             df = pd.read_csv(path)
             if df.empty:
                 raise ValueError("Input DataFrame is empty.")
-            X = df.drop(columns=['result'], errors='ignore').copy()
+            if 'result' in df.columns.to_list():
+                X = df.drop(columns=['result'], errors='ignore').copy()
+            else:
+                X = df.copy()
             X = self._add_location_features(X)
             X = self._add_weather_features(X)
             X = self._add_sofascore_features(X)

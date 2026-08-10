@@ -11,8 +11,9 @@ def predict_proba(
 ) -> pd.DataFrame:
 
     df = pd.read_csv(path)
+    if 'result' in df.columns.to_list():
+        df.drop(columns=['result'], inplace=True)
     X = df.copy()
-
     model = joblib.load(MODEL_PATH)
     probs = model.predict_proba(X)  
 

@@ -124,7 +124,7 @@ def main():
     print("Train Accuracy:", accuracy_score(y, y_pred))
     print(classification_report(y, y_pred))
 
-    joblib.dump(best_model, f"../models/{args.date}/best_model.pkl")
+    joblib.dump(best_model, f"../models/{args.date}_best_model.pkl")
 
 if __name__ == "__main__":
     main()
