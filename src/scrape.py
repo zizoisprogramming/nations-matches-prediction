@@ -460,8 +460,11 @@ def main():
         print("Mode must be one of: weekly, monthly or daily")
         return
 
-    df = pd.read_csv(DATA_PATH).drop_duplicates()
-    label_data(df)
+    try:
+        df = pd.read_csv(DATA_PATH).drop_duplicates()
+        label_data(df)
+    except Exception as e:
+        df = pd.DataFrame()
     test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()
 
     if len(df) >= REQ_TO_TRAIN:
