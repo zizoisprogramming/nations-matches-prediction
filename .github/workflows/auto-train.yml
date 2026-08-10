@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
             uv sync
-            playwright install --with-deps chromium
+            uv run playwright install --with-deps chromium
     
       - name: Run Feature Extraction
         run: make feature_extraction
