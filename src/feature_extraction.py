@@ -487,8 +487,10 @@ class FeatureExtraction():
             X = self._add_derived_features(X)
             X.to_csv(f"{save_dir}/extracted.csv", index=False)
             return f"{save_dir}/extracted.csv"
+        except FileNotFoundError as e:
+            print("new matches are not found")
         except Exception as e:
-            raise e
+            raise
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
