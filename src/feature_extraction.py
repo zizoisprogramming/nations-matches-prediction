@@ -1,6 +1,8 @@
 import sys
 
 import json
+import unicodedata
+import re
 import secrets
 import requests
 import time
@@ -14,6 +16,7 @@ import numpy as np
 import datetime as dt
 
 from pathlib import Path
+from difflib import SequenceMatcher
 from countryinfo import CountryInfo
 from geopy.exc import GeocoderRateLimited
 from geopy.geocoders import Nominatim
@@ -38,6 +41,19 @@ CAPITALS_CACHE_PATH = CACHE_DIR / "capitals_cache.json"
 TEAM_IDS_PATH = CACHE_DIR / "team_ids.json"
 
 N_MATCHES = 2
+
+# Youth, Olympic and other non-senior sides that share a country's name on Sofascore.
+_NON_SENIOR_TEAM = re.compile(r"U\d\d|Olympic|Beach|Futsal|Women", re.IGNORECASE)
+
+
+def _normalize_team_name(name: str) -> str:
+    name = unicodedata.normalize("NFKD", name)
+    name = "".join(c for c in name if not unicodedata.combining(c)).lower()
+    name = name.replace("&", " and ")
+    name = re.sub(r"\bst\b\.?", "saint", name)
+    name = re.sub(r"[^a-z0-9 ]", " ", name)
+    return " ".join(name.split())
+
 
 class FeatureExtraction():
 
@@ -207,23 +223,48 @@ class FeatureExtraction():
         return playwright, browser, page
 
     async def _search_team_id(self, page, team_name: str) -> int | None:
+        """
+        Find the senior men's national team for team_name via Sofascore search.
+        Names are compared after normalizing (accents, "&"/"and", "St"/"Saint"), so
+        spelling variants like "St Vincent ..." or "Congo DR" still resolve.
+        """
+        target = _normalize_team_name(team_name)
+        queries = [team_name]
+        if target != team_name.lower():
+            queries.append(target)  # e.g. "St Vincent ..." -> "saint vincent ..."
 
-        url = f"https://www.sofascore.com/api/v1/search/all?q={team_name.replace(' ', '%20')}&page=0"
-        data = await _api_get(page, url)
-        if not data:
-            raise Exception(f"Couldn't get team id for {team_name}")
-        for r in data.get("results", []):
-            if r.get("type") != "team":
+        seen = []
+        for query in queries:
+            url = f"https://www.sofascore.com/api/v1/search/all?q={query.replace(' ', '%20')}&page=0"
+            data = await _api_get(page, url)
+            if not data:
                 continue
-            entity = r["entity"]
-            if entity.get("sport", {}).get("slug") != "football":
-                continue
-            if entity.get("national") and team_name.lower() in entity.get("name", "").lower():
-                return entity["id"]
-        # for r in data.get("results", []):
-        #     if r.get("type") == "team" and r["entity"].get("sport", {}).get("slug") == "football":
-        #         return r["entity"]["id"]
-        raise Exception(f"Couldn't get team id for {team_name}")
+
+            best, best_score = None, 0.0
+            for r in data.get("results", []):
+                entity = r.get("entity", {})
+                if (r.get("type") != "team"
+                        or entity.get("sport", {}).get("slug") != "football"
+                        or not entity.get("national")
+                        or entity.get("gender") != "M"
+                        or _NON_SENIOR_TEAM.search(entity.get("name", ""))):
+                    continue
+                name = _normalize_team_name(entity.get("name", ""))
+                seen.append(entity.get("name", ""))
+                if name == target:
+                    score = 1.0
+                elif set(name.split()) == set(target.split()):
+                    score = 0.95  # same words, different order: "Congo DR" / "DR Congo"
+                else:
+                    score = SequenceMatcher(None, name, target).ratio()
+                if score > best_score:
+                    best, best_score = entity, score
+
+            if best is not None and best_score >= 0.85:
+                print(f"Resolved team '{team_name}' -> {best['id']} '{best['name']}' (score {best_score:.2f})")
+                return best["id"]
+
+        raise Exception(f"Couldn't get team id for {team_name} (candidates: {sorted(set(seen)) or 'none'})")
 
     async def _get_team_id(self, page, team_name: str, team_ids: dict) -> int | None:
         if team_name in team_ids:
