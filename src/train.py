@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, log_loss
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.base import clone
 
@@ -20,6 +20,30 @@ BASE_DIR = Path(__file__).parent.parent
 MODELS_DIR = BASE_DIR / "models"
 MODEL_PATH = MODELS_DIR / "best_model.pkl"
 TRAIN_DATA_PATH = BASE_DIR / "data" / "processed" / "scaled_train.csv"
+
+# The retrained model replaces best_model.pkl only if its log loss on the held-out
+# test set is at most this much worse than the current model's.
+MAX_LOG_LOSS_INCREASE = 0.0
+
+
+def evaluate(model, X, y):
+    X = X[list(model.feature_names_in_)]
+    return log_loss(y, model.predict_proba(X), labels=[0, 1, 2]), accuracy_score(y, model.predict(X))
+
+
+def is_improvement(current_model, candidate, test_path):
+    """Compare both models on the test set; returns (accept, message)."""
+    if not test_path.exists():
+        return True, f"no test features at {test_path}, accepting the retrained model without comparison"
+    test_df = pd.read_csv(test_path)
+    X_test, y_test = test_df.drop(columns=["result"]), test_df["result"].astype(int)
+    cur_ll, cur_acc = evaluate(current_model, X_test, y_test)
+    new_ll, new_acc = evaluate(candidate, X_test, y_test)
+    accept = new_ll <= cur_ll + MAX_LOG_LOSS_INCREASE
+    msg = (f"test set ({len(y_test)} matches): current log loss {cur_ll:.4f} / accuracy {cur_acc:.3f}, "
+           f"retrained log loss {new_ll:.4f} / accuracy {new_acc:.3f} -> "
+           + ("keeping the retrained model" if accept else "keeping the current model"))
+    return accept, msg
 
 
 def grid_search(X, y, sample_weights):
@@ -128,8 +152,12 @@ def main():
     print("Train Accuracy:", accuracy_score(y, y_pred))
     print(classification_report(y, y_pred))
 
-    joblib.dump(best_model, MODELS_DIR / f"{args.date}_best_model.pkl")
-    joblib.dump(best_model, MODEL_PATH)
+    accept, msg = is_improvement(current_model, best_model, BASE_DIR / "data" / "test" / args.date / "scaled.csv")
+    print(msg)
+    if accept:
+        joblib.dump(best_model, MODELS_DIR / f"{args.date}_best_model.pkl")
+        joblib.dump(best_model, MODEL_PATH)
+    # The new matches are valid training data either way.
     df.to_csv(TRAIN_DATA_PATH, index=False)
 
 if __name__ == "__main__":

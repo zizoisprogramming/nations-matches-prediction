@@ -1,4 +1,4 @@
-.PHONY: train test scrape stage feature_extraction feature_selection feature_scaling 
+.PHONY: train test test_features scrape stage feature_extraction feature_selection feature_scaling 
 
 TODAY := $(shell date +%Y-%m-%d)
 
@@ -36,10 +36,13 @@ train: $(DATA_DIR)/scaled.csv
 	@uv run python -m src.train $(TODAY)
 
 
-test: 
+$(TEST_DIR)/scaled.csv:
 	@mkdir -p $(TEST_DIR)
 	@uv run python -m src.feature_extraction $(TEST_DIR) test
 	@uv run python -m src.feature_selection $(TEST_DIR)
 	@uv run python -m src.feature_scaling $(TEST_DIR)
 
+test_features: $(TEST_DIR)/scaled.csv
+
+test: test_features
 	@uv run python -m src.test $(TEST_DIR)

@@ -57,6 +57,10 @@ jobs:
         if: steps.stage.outputs.has_data == 'true'
         run: make feature_scaling
 
+      - name: Build test features
+        if: steps.stage.outputs.has_data == 'true'
+        run: make test_features
+
       - name: Run train
         if: steps.stage.outputs.has_data == 'true'
         run: make train
