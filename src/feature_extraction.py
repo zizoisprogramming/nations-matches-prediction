@@ -23,7 +23,7 @@ from geopy.geocoders import Nominatim
 from playwright.async_api import async_playwright
 
 from src.helpers.cache import load_cache, save_cache
-from src.helpers.apis import _api_get, SofascoreBlocked
+from src.helpers.apis import _api_get, SofascoreBlocked, RequestFailed
 from src.helpers.helpers import _safe_ratio, slim_event
 from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH
 
@@ -353,7 +353,8 @@ class FeatureExtraction():
     async def _lineup_stats(self, page, event: dict, team_id: int):
         if not event.get("hasStats", False):
             return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
-        data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups")
+        # Raises RequestFailed if Sofascore couldn't be reached; None means no lineups exist.
+        data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups", raise_on_failure=True)
         await asyncio.sleep(1.2)
         if not data:
             return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
@@ -413,7 +414,12 @@ class FeatureExtraction():
             done = 0
             for event in events:
                 
-                lineup = await self._lineup_stats(page, event, team_id)
+                try:
+                    lineup = await self._lineup_stats(page, event, team_id)
+                except RequestFailed as e:
+                    # Couldn't reach Sofascore for this game; keep it cached and try the next.
+                    print(f"  skipping game {event.get('id')} for now: {e}")
+                    continue
                 if any([v is None for _, v in lineup.items()]):
                     # Useless for form stats: drop it so it can't displace a good cached game.
                     self.events_cache[f"{team_id}"] = [
