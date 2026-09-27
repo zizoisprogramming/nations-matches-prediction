@@ -1,14 +1,4 @@
 date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,year,month,day,result
-2024-06-21,Poland,Austria,1.0,3.0,EURO,Berlin,Germany,True,2024,6,21,2
-2024-06-21,Netherlands,France,0.0,0.0,EURO,Leipzig,Germany,True,2024,6,21,0
-2024-06-21,Slovakia,Ukraine,1.0,2.0,EURO,Düsseldorf,Germany,True,2024,6,21,2
-2024-06-21,Peru,Chile,0.0,0.0,COPA,Arlington,United States,True,2024,6,21,0
-2024-06-22,Belgium,Romania,2.0,0.0,EURO,Cologne,Germany,True,2024,6,22,1
-2024-06-22,Turkey,Portugal,0.0,3.0,EURO,Dortmund,Germany,True,2024,6,22,2
-2024-06-22,Mexico,Jamaica,1.0,0.0,COPA,Houston,United States,True,2024,6,22,1
-2024-06-23,Germany,Switzerland,1.0,1.0,EURO,Frankfurt,Germany,False,2024,6,23,0
-2024-06-23,Scotland,Hungary,0.0,1.0,EURO,Stuttgart,Germany,True,2024,6,23,2
-2024-06-23,Uruguay,Panama,3.0,1.0,COPA,Miami Gardens,United States,True,2024,6,23,1
 2024-06-24,Albania,Spain,0.0,1.0,EURO,Düsseldorf,Germany,True,2024,6,24,2
 2024-06-24,Croatia,Italy,1.0,1.0,EURO,Leipzig,Germany,True,2024,6,24,0
 2024-06-24,Colombia,Paraguay,2.0,1.0,COPA,Houston,United States,True,2024,6,24,1
@@ -320,3 +310,13 @@ date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,y
 2026-07-11,Argentina,Switzerland,3.0,1.0,FWC,Kansas City,United States,True,2026,7,11,1
 2026-07-14,France,Spain,0.0,2.0,FWC,Arlington,United States,True,2026,7,14,2
 2026-07-15,England,Argentina,1.0,2.0,FWC,Atlanta,United States,True,2026,7,15,2
+2026-09-24,Puerto Rico,Guyana,0.0,1.0,Concacaf Nations League,Roseau,Dominica,,2026,9,24,2
+2026-09-24,Namibia,Congo,1.0,0.0,Africa Cup of Nations Qualifying,Gaborone,Botswana,,2026,9,24,1
+2026-09-24,Congo DR,Equatorial Guinea,2.0,0.0,Africa Cup of Nations Qualifying,Kinshasa,Congo,,2026,9,24,1
+2026-09-24,Libya,Botswana,2.0,2.0,Africa Cup of Nations Qualifying,Tripoli,Libya,,2026,9,24,0
+2026-09-24,Mauritania,Central African Republic,3.0,1.0,Africa Cup of Nations Qualifying,Casablanca,Morocco,,2026,9,24,1
+2026-09-24,Ivory Coast,Ghana,2.0,0.0,Africa Cup of Nations Qualifying,Bouaké,Ivory Coast,,2026,9,24,1
+2026-09-24,Sierra Leone,Zimbabwe,2.0,3.0,Africa Cup of Nations Qualifying,El Jadida,Morocco,,2026,9,24,2
+2026-09-24,Tunisia,Uganda,1.0,1.0,Africa Cup of Nations Qualifying,Hammadi Agrebi Stadium,Tunisia,,2026,9,24,0
+2026-09-23,Turks and Caicos Islands,Montserrat,0.0,2.0,Concacaf Nations League,Providenciales,Turks and Caicos Islands,,2026,9,23,2
+2026-09-23,Aruba,Antigua and Barbuda,1.0,0.0,Concacaf Nations League,North Sound,Antigua and Barbuda,,2026,9,23,1
