@@ -94,22 +94,42 @@ class FeatureExtraction():
             raise e
 
     def _geocode_place(self, place: str, cache: dict) -> tuple | None:
-        if place in cache:
-            return tuple(cache[place]) 
+        """
+        Coordinates for "city, country". If Nominatim doesn't know the place, retry with
+        "St" spelled out ("Basseterre, Saint Kitts and Nevis"), then fall back to just
+        the country. Only real results are cached, so failures are retried next run.
+        """
+        if cache.get(place):
+            return tuple(cache[place])
         print(f"{place} not found in cache")
-        for _ in range(5):
-            try:
-                time.sleep(1.2)  # Nominatim ~1 req/sec
-                location = self._geolocator.geocode(place)
-                result = (location.latitude, location.longitude) if location else None
+
+        candidates = [place, re.sub(r"\bSt\.?\s", "Saint ", place)]
+        if "," in place:
+            country = place.rsplit(",", 1)[1].strip()
+            candidates += [country, re.sub(r"\bSt\.?\s", "Saint ", country)]
+
+        for query in dict.fromkeys(candidates):  # dedupe, keep order
+            result = self._geocode_query(query)
+            if result:
+                if query != place:
+                    print(f"Geocoded '{place}' using '{query}'")
                 cache[place] = result
                 save_cache(COORDS_CACHE_PATH, cache)
                 return result
+        print(f"Couldn't geocode '{place}'")
+        return None
+
+    def _geocode_query(self, query: str) -> tuple | None:
+        for _ in range(5):
+            try:
+                time.sleep(1.2)  # Nominatim ~1 req/sec
+                location = self._geolocator.geocode(query)
+                return (location.latitude, location.longitude) if location else None
             except GeocoderRateLimited:
                 time.sleep(60)
             except Exception:
                 time.sleep(5)
-        raise Exception(f"Couldn't get geocode for {place}")
+        raise Exception(f"Couldn't get geocode for {query}")
 
     def _add_location_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Geocode home/away capitals + stadium city; add lat/lon and away_stadium_distance_km."""
@@ -136,7 +156,13 @@ class FeatureExtraction():
         df["away_lat"], df["away_lon"] = _geocode_list(away_places)
         df["stadium_lat"], df["stadium_lon"] = _geocode_list(stadium_places)
 
-        return df
+        # Without coordinates there's no distance or weather: drop the match instead of
+        # failing the whole run.
+        coord_cols = ["home_lat", "home_lon", "away_lat", "away_lon", "stadium_lat", "stadium_lon"]
+        missing = df[coord_cols].isna().any(axis=1)
+        for _, r in df[missing].iterrows():
+            print(f"Dropping {r['home_team']} vs {r['away_team']} ({r['date']}): no coordinates")
+        return df[~missing].reset_index(drop=True)
 
     def _fetch_weather(self, lat, lon, date: str, cache: dict) -> dict | None:
         key = f"{lat}_{lon}_{date}"
