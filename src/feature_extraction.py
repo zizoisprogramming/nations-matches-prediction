@@ -193,11 +193,18 @@ class FeatureExtraction():
         if key in cache:
             return cache[key]
         print(f"{key} not found in cache")
+
+        # The archive has no data for the last few days or the future (e.g. predicting
+        # tomorrow's match), so recent dates use the forecast API. Those values can still
+        # change, so they aren't cached.
+        recent = dt.date.fromisoformat(date) >= dt.datetime.now(dt.timezone.utc).date() - dt.timedelta(days=5)
+        url = ("https://api.open-meteo.com/v1/forecast" if recent
+               else "https://archive-api.open-meteo.com/v1/archive")
         for _ in range(5):
             try:
                 time.sleep(1.5)  # well under Open-Meteo's 600/min limit
                 r = requests.get(
-                    "https://archive-api.open-meteo.com/v1/archive",
+                    url,
                     params={
                         "latitude": lat,
                         "longitude": lon,
@@ -216,12 +223,15 @@ class FeatureExtraction():
                     "precipitation": daily["precipitation_sum"][0],
                     "wind_speed": daily["wind_speed_10m_max"][0],
                 }
-                cache[key] = result
-                save_cache(WEATHER_CACHE_PATH, cache)
+                if any(v is None for v in result.values()):
+                    raise ValueError(f"incomplete weather from {url}: {result}")
+                if not recent:
+                    cache[key] = result
+                    save_cache(WEATHER_CACHE_PATH, cache)
                 return result
             except Exception:
                 time.sleep(5)
-        raise Exception(f"Couldn't find weather fot {lat, lon, date}")
+        raise Exception(f"Couldn't find weather for {lat, lon, date}")
 
     def _add_weather_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Fetch historical weather for home/away capitals + stadium; add raw temp/wind columns."""
