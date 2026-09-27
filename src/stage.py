@@ -31,9 +31,10 @@ def main():
     afterwards so the same rows are never staged twice.
     """
     try:
-        df = pd.read_csv(DATA_PATH).drop_duplicates()
+        buffer = pd.read_csv(DATA_PATH)
     except FileNotFoundError:
-        df = pd.DataFrame()
+        buffer = pd.DataFrame()
+    df = buffer.drop_duplicates()
 
     if len(df) < MIN_NEW_MATCHES:
         print(f"Not enough new matches to train ({len(df)}/{MIN_NEW_MATCHES}).")
@@ -50,10 +51,10 @@ def main():
 
     n = len(df)
     if n < MIN_NEW_MATCHES:
-        # Keep the usable ones buffered so they count towards next week's batch.
-        df.drop(columns=["result"]).to_csv(DATA_PATH, index=False)
+        # Leave scraped.csv untouched: a Sofascore block or a bad week must not
+        # throw the buffered matches away; they're retried next run.
         print(f"Only {n} new matches have usable form stats ({n}/{MIN_NEW_MATCHES}); "
-              f"kept them in {DATA_PATH.name} for the next run.")
+              f"kept all {len(buffer)} buffered matches in {DATA_PATH.name} for the next run.")
         return
 
     test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()

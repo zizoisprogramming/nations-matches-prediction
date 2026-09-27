@@ -9,6 +9,8 @@ on:
 
 jobs:
   train:
+    env:
+      PYTHONUNBUFFERED: "1"
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:

@@ -1,6 +1,7 @@
 import sys
 
 import json
+import secrets
 import requests
 import time
 import math
@@ -19,7 +20,7 @@ from geopy.geocoders import Nominatim
 from playwright.async_api import async_playwright
 
 from src.helpers.cache import load_cache, save_cache
-from src.helpers.apis import _api_get
+from src.helpers.apis import _api_get, SofascoreBlocked
 from src.helpers.helpers import _safe_ratio, slim_event
 from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH
 
@@ -195,6 +196,9 @@ class FeatureExtraction():
             extra_http_headers={
                 "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://www.sofascore.com/",
+                # Sofascore answers API requests without it with a Cloudflare 403
+                # "challenge"; the value isn't checked.
+                "X-Requested-With": secrets.token_hex(3),
             },
         )
         page = await context.new_page()
@@ -403,26 +407,35 @@ class FeatureExtraction():
         to_drop = []
         try:
             
-            for idx, row in df.iterrows():
-                match_date = pd.to_datetime(row["date"]).date()
-                # UTC midnight, so ratings-cache keys are the same on any machine's time zone.
-                before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day, tzinfo=dt.timezone.utc).timestamp())
+            done_idx = set()
+            try:
+                for idx, row in df.iterrows():
+                    done_idx.add(idx)
+                    match_date = pd.to_datetime(row["date"]).date()
+                    # UTC midnight, so ratings-cache keys are the same on any machine's time zone.
+                    before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day, tzinfo=dt.timezone.utc).timestamp())
                 
-                for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
-                    try:
-                        team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
-                        stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
-                        for k, v in stats.items():
-                            col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
-                            df.at[idx, col_name] = v
-                    except Exception as e:
-                        # Unknown team or missing form stats: drop the match rather than
-                        # aborting the whole run or training on empty features.
-                        print(e)
-                        to_drop.append(idx)
-                        break
+                    for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
+                        try:
+                            team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
+                            stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
+                            for k, v in stats.items():
+                                col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
+                                df.at[idx, col_name] = v
+                        except SofascoreBlocked:
+                            raise
+                        except Exception as e:
+                            # Unknown team or missing form stats: drop the match rather than
+                            # aborting the whole run or training on empty features.
+                            print(e)
+                            to_drop.append(idx)
+                            break
+            except SofascoreBlocked as e:
+                # Everything else would fail too: drop the unfinished rows and stop.
+                print(f"Sofascore is blocking this machine, stopping: {e}")
+                to_drop.extend(i for i in df.index if i not in done_idx or i == idx)
 
-            df = df.drop(index=to_drop).reset_index(drop=True)
+            df = df.drop(index=sorted(set(to_drop))).reset_index(drop=True)
             with open("to_drop.json", "w") as f:
                 json.dump(to_drop, f)
         finally:
