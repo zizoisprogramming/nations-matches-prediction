@@ -441,7 +441,8 @@ def find_espn_match(date_str: str, match_data:dict, espn_matches=None, threshold
             "away_score": match_data["away_score"],
             "tournament": match_data["tournament"],
             "city": best_match["city"],
-            "country": best_match["country"]
+            "country": best_match["country"],
+            "status": best_match["status"],
         }
  
     return None
@@ -470,6 +471,7 @@ def scrape_espn_qualifiers(date_str: str, espn_matches=None):
             "tournament": m["tournament"],
             "city": m["city"],
             "country": m["country"],
+            "status": m["status"],
         })
 
     return results
@@ -482,6 +484,16 @@ MATCH_REQUIRED_FIELDS = [
 
 def has_required_fields(match: dict) -> bool:
     return all(match.get(field) not in (None, "") for field in MATCH_REQUIRED_FIELDS)
+
+
+# ESPN's status column for a match that's over: "FT", "AET", "FT-Pens". Anything else
+# (a minute like "67'", "HT", empty for not started, postponed, abandoned) isn't final.
+# FIFA's own status badge can't be used: its selector no longer matches, so it's always "TBD".
+FINISHED_STATUS = re.compile(r"^(FT|AET)(-Pens)?$|^Pens$", re.IGNORECASE)
+
+
+def is_finished(match: dict) -> bool:
+    return bool(FINISHED_STATUS.match((match.get("status") or "").strip()))
 
 
 def post_scrape(data: dict):
@@ -531,7 +543,7 @@ def main():
 
         espn_matches = with_retries(scrape_espn, date_str, site_key="espn", max_retries=4, base_delay=10.0)
 
-        unpaired, incomplete = [], []
+        unpaired, incomplete, not_finished = [], [], []
         for match in matches:
             post_scrape(match)
             target = find_espn_match(date_str, match, espn_matches)
@@ -539,26 +551,34 @@ def main():
                 unpaired.append(match)
                 continue
             post_scrape(target)
-            if has_required_fields(target):
-                full_matches.append(target)
-            else:
+            if not has_required_fields(target):
                 incomplete.append(target)
+            elif not is_finished(target):
+                not_finished.append(target)
+            else:
+                full_matches.append({k: v for k, v in target.items() if k != "status"})
 
         qualifiers = scrape_espn_qualifiers(date_str, espn_matches)
         for qualifier_match in qualifiers:
             post_scrape(qualifier_match)
-            if has_required_fields(qualifier_match):
-                full_matches.append(qualifier_match)
-            else:
+            if not has_required_fields(qualifier_match):
                 incomplete.append(qualifier_match)
+            elif not is_finished(qualifier_match):
+                not_finished.append(qualifier_match)
+            else:
+                full_matches.append({k: v for k, v in qualifier_match.items() if k != "status"})
 
         print(f"  📅 {date_str}: {len(matches)} FIFA target matches, {len(qualifiers)} ESPN qualifiers, "
-              f"{len(unpaired)} not found on ESPN, {len(incomplete)} missing fields")
+              f"{len(unpaired)} not found on ESPN, {len(incomplete)} missing fields, "
+              f"{len(not_finished)} not finished")
         for m in unpaired:
             print(f"     ✗ no ESPN match: {m['home_team']} vs {m['away_team']} ({m['tournament']})")
         for m in incomplete:
             missing = [f for f in MATCH_REQUIRED_FIELDS if m.get(f) in (None, "")]
             print(f"     ✗ missing {missing}: {m['home_team']} vs {m['away_team']} ({m['tournament']})")
+        for m in not_finished:
+            print(f"     ✗ not finished (status {m.get('status')!r}): {m['home_team']} vs {m['away_team']} "
+                  f"({m['tournament']})")
 
     if not full_matches:
         print("\nNo matches found.")
