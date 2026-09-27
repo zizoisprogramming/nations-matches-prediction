@@ -528,6 +528,9 @@ class FeatureExtraction():
             X = self._add_location_features(X)
             X = self._add_weather_features(X)
             X = self._add_sofascore_features(X)
+            if X.empty:
+                print("no matches left after Sofascore features")
+                sys.exit(1)
             X = self._add_derived_features(X)
             X.to_csv(f"{save_dir}/extracted.csv", index=False)
             return f"{save_dir}/extracted.csv"
