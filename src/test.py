@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from sklearn.metrics import classification_report
+import src.inference as inference
 from src.inference import predict
 
 
@@ -12,7 +13,8 @@ MODEL_PATH = BASE_DIR / "models" / "best_model.pkl"
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("save_dir")
-    parser.add_argument("date")
+    parser.add_argument("date", nargs="?", default=None,
+                        help="evaluate models/<date>_best_model.pkl instead of models/best_model.pkl")
 
     args = parser.parse_args()
     save_dir = args.save_dir
@@ -23,6 +25,7 @@ if __name__ == "__main__":
     y_true = pd.read_csv(save_dir + "/scaled.csv")['result']
 
     if date is not None:
-        MODEL_PATH = BASE_DIR / "models" / f"{date}_best_model.pkl"
+        inference.MODEL_PATH = BASE_DIR / "models" / f"{date}_best_model.pkl"
+    print(f"Evaluating {inference.MODEL_PATH.name} on {len(y_true)} test matches")
     y_pred = predict(save_dir + "/scaled.csv")
     print(classification_report(y_true, y_pred))

@@ -83,15 +83,39 @@ class FeatureExtraction():
         return 6371.0 * 2 * np.arcsin(np.sqrt(a))
 
     def _get_capital(self, team_name: str, cache: dict) -> str | None:
-        if team_name in cache:
+        """
+        Capital for a team's country. If countryinfo doesn't know the name, try "St"
+        spelled out, then other names in team_ids.json with the same Sofascore id
+        (e.g. "Congo DR" -> "DR Congo"), preferring ones with the same words.
+        Returns None (the match is dropped later) instead of failing the run.
+        """
+        if cache.get(team_name):
             return cache[team_name]
         print(f"{team_name} not found in cache")
-        try:
-            cache[team_name] = CountryInfo(team_name).capital()
-            save_cache(CAPITALS_CACHE_PATH, cache)
-            return cache[team_name]
-        except Exception as e:
-            raise e
+
+        candidates = [team_name, re.sub(r"\bSt\.?\s", "Saint ", team_name)]
+        team_id = self.team_ids.get(team_name)
+        if team_id is not None:
+            same_id = [n for n, i in self.team_ids.items() if i == team_id and n != team_name]
+            words = set(_normalize_team_name(team_name).split())
+            same_id.sort(key=lambda n: set(_normalize_team_name(n).split()) != words)
+            candidates += same_id
+
+        for name in dict.fromkeys(candidates):
+            capital = cache.get(name)
+            if not capital:
+                try:
+                    capital = CountryInfo(name).capital()
+                except Exception:
+                    continue
+            if capital:
+                if name != team_name:
+                    print(f"Capital for '{team_name}' taken from '{name}': {capital}")
+                cache[team_name] = capital
+                save_cache(CAPITALS_CACHE_PATH, cache)
+                return capital
+        print(f"Couldn't find a capital for '{team_name}'")
+        return None
 
     def _geocode_place(self, place: str, cache: dict) -> tuple | None:
         """
