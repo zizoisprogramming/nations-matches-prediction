@@ -12,7 +12,9 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    # Sofascore 403s GitHub-hosted (Azure datacenter) IPs, so this runs on a
+    # self-hosted runner on a home connection. The custom label keeps other jobs off it.
+    runs-on: [self-hosted, macOS, sofascore]
     permissions:
       contents: write
 
@@ -31,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
             uv sync
-            uv run playwright install --with-deps chromium
+            uv run playwright install chromium
 
       - name: Stage new matches
         id: stage
