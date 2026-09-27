@@ -14,7 +14,15 @@ from src.helpers.constants import REQ_TO_TRAIN, DATA_PATH, NEW_DATA_PATH, TEST_D
 
 TARGET_COMPETITIONS = [
     "CAF Africa Cup of Nations", "UEFA European Championship", "FIFA World Cup",
-    "CONMEBOL Copa America", "UEFA Nations League", "AFC Asian Cup", "Concacaf Nations League"
+    "CONMEBOL Copa America", "UEFA Nations League", "AFC Asian Cup", "Concacaf Nations League",
+    "FIFA ASEAN Cup"
+]
+
+# FIFA's match-centre never carries these qualifiers as competition cards (verified
+# empirically across multiple qualifying windows), so they're scraped from ESPN
+# directly instead of being filtered out of the FIFA scrape like TARGET_COMPETITIONS.
+ESPN_QUALIFIER_COMPETITIONS = [
+    "Africa Cup of Nations Qualifying", "UEFA European Championship Qualifying", "AFC Asian Cup Qualifiers"
 ]
 
 
@@ -126,10 +134,11 @@ def with_retries(scrape_fn, *args, site_key: str, max_retries: int = 2, base_del
     return result
 
 
-def is_target_competition(name: str) -> bool:
-    
+def is_target_competition(name: str, competitions=None) -> bool:
+
+    competitions = competitions if competitions is not None else TARGET_COMPETITIONS
     name = name.lower()
-    for comp in TARGET_COMPETITIONS:
+    for comp in competitions:
         if _text_similarity(name, comp.lower()) > 0.9:
             return True
 
@@ -381,6 +390,8 @@ def scrape_espn(date_str: str):
                                 "city": city,
                                 "country": region,
                                 "attendance": attendance,
+                                "tournament": competition_name,
+                                "date": date_str,
                             })
 
                         except Exception as e:
@@ -401,7 +412,7 @@ def  _text_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, (a or "").lower().strip(), (b or "").lower().strip()).ratio()
  
  
-def find_espn_match(date_str: str, match_data:dict, espn_matches=None, threshold: float = 0.6):
+def find_espn_match(date_str: str, match_data:dict, espn_matches=None, threshold: float = 0.75):
 
     if espn_matches is None:
         espn_matches = scrape_espn(date_str)
@@ -411,8 +422,10 @@ def find_espn_match(date_str: str, match_data:dict, espn_matches=None, threshold
  
     for m in espn_matches:
         # Try both orderings, since we don't know which given name is home/away.
-        score_normal = ( _text_similarity(match_data["home_team"], m["home_team"]) +  _text_similarity(match_data["away_team"], m["away_team"])) / 2
-        score_swapped = ( _text_similarity(match_data["home_team"], m["away_team"]) +  _text_similarity(match_data["away_team"], m["home_team"])) / 2
+        # Score by the weaker of the two team names (not the mean), so one exact name
+        # can't carry an unrelated opponent past the threshold (e.g. "Grenada" ~ "Girona").
+        score_normal = min(_text_similarity(match_data["home_team"], m["home_team"]), _text_similarity(match_data["away_team"], m["away_team"]))
+        score_swapped = min(_text_similarity(match_data["home_team"], m["away_team"]), _text_similarity(match_data["away_team"], m["home_team"]))
         score = max(score_normal, score_swapped)
  
         if score > best_score:
@@ -433,7 +446,44 @@ def find_espn_match(date_str: str, match_data:dict, espn_matches=None, threshold
  
     return None
 
- 
+
+def scrape_espn_qualifiers(date_str: str, espn_matches=None):
+    """
+    AFCON/Euro/Asian Cup qualifiers aren't on FIFA's match centre at all, so unlike
+    TARGET_COMPETITIONS matches (found on FIFA, then enriched with ESPN's city/country
+    via find_espn_match), these are scraped from ESPN directly. Returns the same shape
+    find_espn_match does.
+    """
+    if espn_matches is None:
+        espn_matches = scrape_espn(date_str)
+
+    results = []
+    for m in espn_matches:
+        if not is_target_competition(m["tournament"], ESPN_QUALIFIER_COMPETITIONS):
+            continue
+        results.append({
+            "home_team": m["home_team"],
+            "away_team": m["away_team"],
+            "date": m["date"],
+            "home_score": m["home_score"],
+            "away_score": m["away_score"],
+            "tournament": m["tournament"],
+            "city": m["city"],
+            "country": m["country"],
+        })
+
+    return results
+
+
+MATCH_REQUIRED_FIELDS = [
+    "home_team", "away_team", "home_score", "away_score", "tournament", "city", "country", "date"
+]
+
+
+def has_required_fields(match: dict) -> bool:
+    return all(match.get(field) not in (None, "") for field in MATCH_REQUIRED_FIELDS)
+
+
 def post_scrape(data: dict):
     ts = pd.to_datetime(data['date'])
     data['year'] = ts.year
@@ -497,25 +547,46 @@ def main():
         print(f"Mode {mode} not supported")
         sys.exit(1)
 
-    date = datetime.date.today() 
+    # Start from yesterday: today's matches have no final score yet, and the next
+    # run's window starts after today, so they'd otherwise never be collected.
+    date = datetime.date.today() - datetime.timedelta(days=1)
     for _ in range(span):
         date_str = date.strftime("%Y-%m-%d")
         matches = with_retries(scrape_fifa_matches, date_str, site_key="fifa", max_retries=4, base_delay=8.0)
         date -= datetime.timedelta(days=1)
-        
-        if not matches:
-            continue
-        for match in matches:
-            post_scrape(match)
 
         espn_matches = with_retries(scrape_espn, date_str, site_key="espn", max_retries=4, base_delay=10.0)
+
+        unpaired, incomplete = [], []
         for match in matches:
+            post_scrape(match)
             target = find_espn_match(date_str, match, espn_matches)
-            if target is not None:
-                post_scrape(target)
+            if target is None:
+                unpaired.append(match)
+                continue
+            post_scrape(target)
+            if has_required_fields(target):
                 full_matches.append(target)
-        
-    if not matches:
+            else:
+                incomplete.append(target)
+
+        qualifiers = scrape_espn_qualifiers(date_str, espn_matches)
+        for qualifier_match in qualifiers:
+            post_scrape(qualifier_match)
+            if has_required_fields(qualifier_match):
+                full_matches.append(qualifier_match)
+            else:
+                incomplete.append(qualifier_match)
+
+        print(f"  📅 {date_str}: {len(matches)} FIFA target matches, {len(qualifiers)} ESPN qualifiers, "
+              f"{len(unpaired)} not found on ESPN, {len(incomplete)} missing fields")
+        for m in unpaired:
+            print(f"     ✗ no ESPN match: {m['home_team']} vs {m['away_team']} ({m['tournament']})")
+        for m in incomplete:
+            missing = [f for f in MATCH_REQUIRED_FIELDS if m.get(f) in (None, "")]
+            print(f"     ✗ missing {missing}: {m['home_team']} vs {m['away_team']} ({m['tournament']})")
+
+    if not full_matches:
         print("\nNo matches found.")
         sys.exit(0)
 

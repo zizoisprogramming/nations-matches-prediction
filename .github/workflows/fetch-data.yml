@@ -8,6 +8,8 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -26,3 +28,15 @@ jobs:
 
       - name: Fetch new data
         run: make scrape
+
+      - name: Commit scraped data
+        run: |
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/
+            if git diff --cached --quiet; then
+                echo "No data changes to commit."
+            else
+                git commit -m "data: weekly scrape $(date +%F)"
+                git push
+            fi
