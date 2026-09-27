@@ -511,6 +511,10 @@ def main():
         print("Mode must be one of: weekly, monthly or daily")
         return
 
+    # data/staging/ isn't tracked by git until scraped.csv is committed, so a fresh
+    # CI checkout doesn't have it and to_csv would fail.
+    DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+
     try:
         df = pd.read_csv(DATA_PATH).drop_duplicates()
         label_data(df)
