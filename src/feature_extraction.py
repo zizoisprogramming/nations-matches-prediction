@@ -51,6 +51,10 @@ class FeatureExtraction():
         self.team_ids = load_cache(TEAM_IDS_PATH)
         self.ratings_cache = load_cache(RATINGS_CACHE_PATH)
         self.events_cache = load_cache(EVENTS_CACHE_PATH)
+        # Teams whose events were refreshed from Sofascore this run, and
+        # (team_id, event_id) pairs whose lineups gave full stats.
+        self._refreshed = set()
+        self._verified = set()
 
     def _haversine(self, lat1, lon1, lat2, lon2):
 
@@ -313,12 +317,7 @@ class FeatureExtraction():
         _, opp_shots = extract(opp_side)
         return {"ranking": ranking, "rating": our_rating, "shots": our_shots, "scored": scored, "scored_against": scored_against, "shots_against": opp_shots}
 
-    async def _last_n_form_stats(self, page, team_id: int, before_ts: int, cache: dict, mode="no-pull") -> dict:
-
-        if mode == "pull" or f"{team_id}" not in self.events_cache:
-            await self._fetch_finished_events_till_overlap(page, team_id)
-
-        events = await self._fetch_recent_finished_events(team_id, before_ts)
+    async def _last_n_form_stats(self, page, team_id: int, before_ts: int, cache: dict) -> dict:
 
         ranking = None
         fixes, shots, scored, shots_against, rel_shots, rel_goals = [], [], [], [], [], []
@@ -335,11 +334,22 @@ class FeatureExtraction():
             ranking = stats["ranking"]
         else:
             print(f"{cache_key} not found in cache")
+            if team_id not in self._refreshed:
+                await self._fetch_finished_events_till_overlap(page, team_id)
+                self._refreshed.add(team_id)
+            events = await self._fetch_recent_finished_events(team_id, before_ts)
+
             done = 0
             for event in events:
                 
                 lineup = await self._lineup_stats(page, event, team_id)
-                if any([v is None for _, v in lineup.items()]): continue
+                if any([v is None for _, v in lineup.items()]):
+                    # Useless for form stats: drop it so it can't displace a good cached game.
+                    self.events_cache[f"{team_id}"] = [
+                        e for e in self.events_cache[f"{team_id}"] if e.get("id") != event.get("id")
+                    ]
+                    continue
+                self._verified.add((team_id, event.get("id")))
                 stats = {
                     "fix": lineup["rating"],
                     "shots_against": lineup["shots_against"],
@@ -395,7 +405,8 @@ class FeatureExtraction():
             
             for idx, row in df.iterrows():
                 match_date = pd.to_datetime(row["date"]).date()
-                before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day).timestamp())
+                # UTC midnight, so ratings-cache keys are the same on any machine's time zone.
+                before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day, tzinfo=dt.timezone.utc).timestamp())
                 
                 for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
                     try:
@@ -422,6 +433,38 @@ class FeatureExtraction():
 
     def _add_sofascore_features(self, df: pd.DataFrame) -> pd.DataFrame:
         return asyncio.get_event_loop().run_until_complete(self._fetch_sofascore_features_async(df))
+
+    def _trim_events_cache(self, team_ids):
+        """
+        Keep each team's events from newest to oldest until N_MATCHES of them are known
+        to give full stats; older ones are dropped. Newer unverified events are kept too,
+        so a game that later turns out null never pushes out the good cached ones.
+        Teams without N_MATCHES verified events are left untouched.
+        """
+        for team_id in team_ids:
+            events = sorted(self.events_cache.get(f"{team_id}", []),
+                            key=lambda e: e.get("startTimestamp", 0), reverse=True)
+            kept, good = [], 0
+            for e in events:
+                kept.append(e)
+                if (team_id, e.get("id")) in self._verified:
+                    good += 1
+                    if good >= N_MATCHES:
+                        break
+            if good >= N_MATCHES:
+                self.events_cache[f"{team_id}"] = kept
+        save_cache(EVENTS_CACHE_PATH, self.events_cache)
+
+    def warm_form_cache(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Refresh and compute Sofascore form stats for every row of df into the ratings
+        cache, then trim the events cache of the teams involved. Returns the rows whose
+        stats could be computed, with df's original columns.
+        """
+        out = self._add_sofascore_features(df)
+        self._trim_events_cache(self._refreshed)
+        save_cache(RATINGS_CACHE_PATH, self.ratings_cache)
+        return out[df.columns.to_list()]
 
     def _add_derived_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add engineered columns that may be absent from raw input."""

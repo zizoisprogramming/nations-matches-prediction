@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from src.feature_extraction import FeatureExtraction
 from src.helpers.constants import REQ_TO_TRAIN, DATA_PATH, NEW_DATA_PATH, TEST_DATA_PATH
 
 
@@ -38,6 +39,10 @@ def main():
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.dropna(subset=["home_score", "away_score"]).reset_index(drop=True)
     label_data(df)
+
+    # Compute every buffered match's form stats (fresh from Sofascore) before the
+    # events cache is trimmed; the rows sent to test.csv aren't extracted until later.
+    df = FeatureExtraction().warm_form_cache(df)
 
     test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()
 

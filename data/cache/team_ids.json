@@ -33,6 +33,7 @@
     "Czechia": 4714,
     "C\u00f4te d'Ivoire": 4768,
     "DR Congo": 4823,
+    "Congo DR": 4823,
     "Denmark": 4476,
     "Ecuador": 4757,
     "Egypt": 4758,
@@ -152,5 +153,7 @@
     "USA": 1245584,
     "IR Iran": 4766,
     "T\u00fcrkiye": 4700,
-    "Curaçao": 55827
+    "Curaçao": 55827,
+    "St Vincent and the Grenadines": 21821,
+    "Saint Vincent and the Grenadines": 21821
 }
