@@ -78,6 +78,8 @@ class FeatureScaling:
         X = df.drop(columns=['result'], errors='ignore').copy()
         X = self._add_cyclic_features(X)
         self.scale(X)
+        if 'result' in df.columns:
+            X['result'] = df['result']
         X.to_csv(f"{save_dir}/scaled.csv", index=False)
         return f"{save_dir}/scaled.csv"
 

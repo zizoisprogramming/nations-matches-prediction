@@ -59,6 +59,8 @@ class FeatureSelection:
                 f"Input DataFrame is missing required features: {missing}"
             )
         X = X[SELECTED_FEATURES]
+        if 'result' in df.columns:
+            X['result'] = df['result']
         X.to_csv(f"{save_dir}/selected.csv", index=False)
         return f"{save_dir}/selected.csv"
 

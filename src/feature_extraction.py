@@ -1,3 +1,4 @@
+import sys
 
 import json
 import requests
@@ -184,11 +185,9 @@ class FeatureExtraction():
         
         playwright = await async_playwright().start()
         browser = await playwright.chromium.launch(headless=True)
+        # No user_agent override: a spoofed UA that doesn't match the real browser's
+        # fingerprint gets every Sofascore API call rejected with 403.
         context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-            ),
             extra_http_headers={
                 "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://www.sofascore.com/",
@@ -236,11 +235,13 @@ class FeatureExtraction():
         new_events = []
 
         for e in events:
-            if e["startTimestamp"] < before_ts:
+            if e["startTimestamp"] < before_ts and e.get("hasStats", False):
                 new_events.append(e)
 
         new_events.sort(key=lambda e: e.get("startTimestamp", 0), reverse=True)
-        return new_events[:N_MATCHES]
+        # Return a few spare candidates: _last_n_form_stats stops after N_MATCHES usable
+        # ones, and a lineup can still come back without ratings/shots.
+        return new_events[:N_MATCHES * 5]
 
     async def _fetch_finished_events_till_overlap(self, page, team_id: int, max_pages=10):
 
@@ -397,17 +398,18 @@ class FeatureExtraction():
                 before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day).timestamp())
                 
                 for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
-                    team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
-                    if team_id is None:
-                        continue
                     try:
+                        team_id = await self._get_team_id(page, str(row[team_col]).strip(), self.team_ids)
                         stats = await self._last_n_form_stats(page, team_id, before_ts, self.ratings_cache)
                         for k, v in stats.items():
                             col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
                             df.at[idx, col_name] = v
                     except Exception as e:
+                        # Unknown team or missing form stats: drop the match rather than
+                        # aborting the whole run or training on empty features.
                         print(e)
                         to_drop.append(idx)
+                        break
 
             df = df.drop(index=to_drop).reset_index(drop=True)
             with open("to_drop.json", "w") as f:
@@ -477,10 +479,9 @@ class FeatureExtraction():
             df = pd.read_csv(path)
             if df.empty:
                 raise ValueError("Input DataFrame is empty.")
-            if 'result' in df.columns.to_list():
-                X = df.drop(columns=['result'], errors='ignore').copy()
-            else:
-                X = df.copy()
+            # 'result' is carried through the pipeline so labels stay aligned with
+            # the rows kept here (rows can be dropped below).
+            X = df.copy()
             X = self._add_location_features(X)
             X = self._add_weather_features(X)
             X = self._add_sofascore_features(X)
@@ -488,7 +489,8 @@ class FeatureExtraction():
             X.to_csv(f"{save_dir}/extracted.csv", index=False)
             return f"{save_dir}/extracted.csv"
         except FileNotFoundError as e:
-            print("new matches are not found")
+            print(f"new matches are not found: {path}")
+            sys.exit(1)
         except Exception as e:
             raise
 

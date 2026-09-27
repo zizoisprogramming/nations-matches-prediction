@@ -1,9 +1,7 @@
 
 
 import pandas as pd
-import os 
 from pathlib import Path
-import datetime as dt
 import joblib
 import argparse
 
@@ -15,49 +13,16 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.utils.class_weight import compute_class_weight
+from sklearn.base import clone
 
-from src.feature_extraction import FeatureExtraction
-from src.feature_scaling import FeatureScaling
-from src.feature_selection import FeatureSelection
-from src.inference import predict_proba
-from src.helpers.constants import NEW_DATA_PATH
 
-def main():
+BASE_DIR = Path(__file__).parent.parent
+MODELS_DIR = BASE_DIR / "models"
+MODEL_PATH = MODELS_DIR / "best_model.pkl"
+TRAIN_DATA_PATH = BASE_DIR / "data" / "processed" / "scaled_train.csv"
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("date", help="date of the run")
 
-    args = parser.parse_args()
-
-    BASE_DIR = Path(__file__).parent.parent
-    save_dir = BASE_DIR / args.date
-
-    try:
-        os.makedirs(save_dir, exist_ok=True)
-    except:
-        raise Exception("Couldn't make dir", save_dir)
-
-    fe = FeatureExtraction()
-    path = fe.run(NEW_DATA_PATH, save_dir)
-
-    fsc = FeatureScaling()
-    path = fsc.run(path, save_dir)
-
-    fsl = FeatureSelection()
-    path = fsl.run(path, save_dir)
-
-    df = pd.read_csv(path, index=False)
-    X, y = df.drop(columns=['result']), df['result']
-
-    classes = np.unique(y)
-    weights = compute_class_weight(
-        class_weight="balanced",
-        classes=classes,
-        y=y
-    )
-    class_weights = dict(zip(classes, weights))
-    sample_weights = y.map(class_weights)
-
+def grid_search(X, y, sample_weights):
     xgb = XGBClassifier(
         objective="multi:softprob",
         num_class=3,
@@ -115,6 +80,45 @@ def main():
     print("Best CV Accuracy:")
     print(grid.best_score_)
 
+    return best_model
+
+
+def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("date", help="date of the run")
+    parser.add_argument("--search", action="store_true",
+                        help="re-run the full hyperparameter grid search (slow) instead of "
+                             "refitting the current best model's hyperparameters")
+
+    args = parser.parse_args()
+
+    # The Makefile's train target has already run extraction -> selection -> scaling
+    # on the staged matches into data/<date>/.
+    new_df = pd.read_csv(BASE_DIR / "data" / args.date / "scaled.csv")
+    train_df = pd.read_csv(TRAIN_DATA_PATH)
+    df = pd.concat([train_df, new_df], ignore_index=True)
+    print(f"Training on {len(train_df)} historical + {len(new_df)} new matches")
+
+    current_model = joblib.load(MODEL_PATH)
+    feature_names = list(current_model.feature_names_in_)
+    X, y = df[feature_names], df['result'].astype(int)
+
+    classes = np.unique(y)
+    weights = compute_class_weight(
+        class_weight="balanced",
+        classes=classes,
+        y=y
+    )
+    class_weights = dict(zip(classes, weights))
+    sample_weights = y.map(class_weights)
+
+    if args.search:
+        best_model = grid_search(X, y, sample_weights)
+    else:
+        best_model = clone(current_model)
+        best_model.fit(X, y, sample_weight=sample_weights)
+
     y_pred = best_model.predict(X)
     probs = best_model.predict_proba(X)
 
@@ -124,7 +128,9 @@ def main():
     print("Train Accuracy:", accuracy_score(y, y_pred))
     print(classification_report(y, y_pred))
 
-    joblib.dump(best_model, f"../models/{args.date}_best_model.pkl")
+    joblib.dump(best_model, MODELS_DIR / f"{args.date}_best_model.pkl")
+    joblib.dump(best_model, MODEL_PATH)
+    df.to_csv(TRAIN_DATA_PATH, index=False)
 
 if __name__ == "__main__":
     main()

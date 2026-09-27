@@ -10,7 +10,7 @@ import re
 from time import sleep
 import datetime
 
-from src.helpers.constants import REQ_TO_TRAIN, DATA_PATH, NEW_DATA_PATH, TEST_DATA_PATH
+from src.helpers.constants import DATA_PATH
 
 TARGET_COMPETITIONS = [
     "CAF Africa Cup of Nations", "UEFA European Championship", "FIFA World Cup",
@@ -490,18 +490,6 @@ def post_scrape(data: dict):
     data['month'] = ts.month
     data['day'] = ts.day
 
-def label_data(df: pd.DataFrame):
-    df['result'] = np.select(
-        [
-            df['home_score'] > df['away_score'],
-            df['home_score'] < df['away_score']
-        ],
-        [
-            1,  
-            2   
-        ],
-        default=0 
-    )
 def main():
     parser = argparse.ArgumentParser(description="Scrape FIFA Match Centre for a specific date")
     parser.add_argument("mode", help="Weekly, monthly or daily")
@@ -515,30 +503,12 @@ def main():
     # CI checkout doesn't have it and to_csv would fail.
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+    # Staging scraped.csv into training data is done by src/stage.py in auto-train.
     try:
         df = pd.read_csv(DATA_PATH).drop_duplicates()
-        label_data(df)
     except Exception as e:
         df = pd.DataFrame()
-    test_df = pd.read_csv(TEST_DATA_PATH).drop_duplicates()
 
-    if len(df) >= REQ_TO_TRAIN:
-        n_from_df = int(0.7 * REQ_TO_TRAIN)
-        n_from_test = int(0.3 * REQ_TO_TRAIN)
-
-        df_new = df.iloc[:n_from_df]
-        df_rest = df.iloc[n_from_df:]
-
-        test_new = test_df.iloc[:n_from_test]
-        test_rest = test_df.iloc[n_from_test:]
-
-        new_data = pd.concat([df_new, test_new], ignore_index=True)
-        new_data.to_csv(NEW_DATA_PATH, index=False)
-
-        updated_test_df = pd.concat([test_rest, df_rest], ignore_index=True)
-        updated_test_df.to_csv(TEST_DATA_PATH, index=False)
-
-    
     full_matches = []
     span_dict = {
         "weekly": 7,

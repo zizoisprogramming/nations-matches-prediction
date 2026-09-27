@@ -18,9 +18,9 @@ if __name__ == "__main__":
     save_dir = args.save_dir
     date = args.date
 
-    og_test = "/".join(save_dir.split("/")[:-1])
-    df = pd.read_csv(og_test + "/test.csv")
-    y_true = df['result']
+    # Labels come from scaled.csv: feature extraction can drop rows, so test.csv's
+    # 'result' column no longer lines up with the predictions.
+    y_true = pd.read_csv(save_dir + "/scaled.csv")['result']
 
     if date is not None:
         MODEL_PATH = BASE_DIR / "models" / f"{date}_best_model.pkl"
