@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 # After this many Sofascore 403s in a row we're being blocked (e.g. datacenter IP),
 # so stop instead of spending minutes on requests that will all fail.
@@ -13,6 +14,19 @@ ATTEMPTS = 3
 FAILURES_BEFORE_COOLDOWN = 5
 COOLDOWN_SECONDS = 60
 _consecutive_failures = 0
+
+# Minimum time between two Sofascore requests. Bursts of requests get the IP put under a
+# 403 "challenge" for hours, so every request through _api_get is spaced at least this far apart.
+REQUEST_DELAY_SECONDS = 2.5
+_last_request_at = 0.0
+
+
+async def _pace():
+    global _last_request_at
+    wait = REQUEST_DELAY_SECONDS - (time.monotonic() - _last_request_at)
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _last_request_at = time.monotonic()
 
 
 class SofascoreBlocked(Exception):
@@ -35,6 +49,7 @@ async def _api_get(page, url: str, raise_on_failure: bool = False):
     last_error = ""
     for attempt in range(1, ATTEMPTS + 1):
         try:
+            await _pace()
             response = await page.goto(url, timeout=REQUEST_TIMEOUT_MS)
             if response.status == 200:
                 _consecutive_403 = 0

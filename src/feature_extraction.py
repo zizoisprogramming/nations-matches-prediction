@@ -372,7 +372,6 @@ class FeatureExtraction():
         overlap = False
         for page_num in range(max_pages):
             data = await _api_get(page, f"https://www.sofascore.com/api/v1/team/{team_id}/events/last/{page_num}")
-            await asyncio.sleep(1.2)
             if not data:
                 break
 
@@ -398,7 +397,6 @@ class FeatureExtraction():
             return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
         # Raises RequestFailed if Sofascore couldn't be reached; None means no lineups exist.
         data = await _api_get(page, f"https://www.sofascore.com/api/v1/event/{event['id']}/lineups", raise_on_failure=True)
-        await asyncio.sleep(1.2)
         if not data:
             return {"ranking": None, "rating": None, "shots": None, "scored": None, "scored_against": None, "shots_against": None}
 
