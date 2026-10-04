@@ -278,7 +278,16 @@ class FeatureExtraction():
             },
         )
         page = await context.new_page()
-        await page.goto("https://www.sofascore.com/", wait_until="domcontentloaded")
+        # Visit the homepage first so the session looks like a normal browser. Only the
+        # first response is needed: the full page can take 30s+ on a slow connection,
+        # and the API works without it, so a failure here isn't fatal.
+        for attempt in range(1, 4):
+            try:
+                await page.goto("https://www.sofascore.com/", wait_until="commit", timeout=60_000)
+                break
+            except Exception as e:
+                print(f"  ⚠️  Sofascore homepage attempt {attempt}/3 failed: {str(e).splitlines()[0]}")
+                await asyncio.sleep(5 * attempt)
         await asyncio.sleep(2)
         return playwright, browser, page
 
