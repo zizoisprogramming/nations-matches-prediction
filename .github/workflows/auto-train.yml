@@ -26,6 +26,12 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
+        with:
+          # Pinned so the self-hosted runner reuses its tool-cache copy instead of
+          # downloading every new uv release; bump by hand to upgrade.
+          version: "0.12.23"
+          # ~/.cache/uv persists on this machine, so GitHub's cache service adds nothing.
+          enable-cache: false
 
       - name: Set up Python
         run: uv python install 3.14
