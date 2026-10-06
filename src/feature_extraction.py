@@ -25,7 +25,7 @@ from playwright.async_api import async_playwright
 from src.helpers.cache import load_cache, save_cache
 from src.helpers.apis import _api_get, SofascoreBlocked, RequestFailed
 from src.helpers.helpers import _safe_ratio, slim_event
-from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH, FORM_SOURCE, APIFOOTBALL_MATCHES_PATH
+from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH, FORM_SOURCE, APIFOOTBALL_MATCHES_PATH, FORM_SEED_PATH, MAX_MISSING_FORM_GAMES
 
 nest_asyncio.apply()
 
@@ -628,7 +628,9 @@ class FeatureExtraction():
         return out
 
     def _apifootball_games(self) -> dict:
-        """Sofascore team id -> its collected API-Football games, newest first."""
+        """Sofascore team id -> its games with form stats, newest first: the daily-collected
+        API-Football games plus each team's last 2 games seeded from the Sofascore caches
+        (src/seed_form_cache.py), which newer API-Football games push out of the last 2."""
         if getattr(self, "_af_games", None) is None:
             from src.collect_apifootball import team_summary
             games = {}
@@ -644,6 +646,8 @@ class FeatureExtraction():
                         "conceded": side["conceded"],
                         **team_summary(side["players"], other["players"]),
                     })
+            for team_id, rows in load_cache(FORM_SEED_PATH).items():
+                games.setdefault(int(team_id), []).extend(rows)
             for g in games.values():
                 g.sort(key=lambda x: x["timestamp"], reverse=True)
             self._af_games = games
@@ -667,8 +671,16 @@ class FeatureExtraction():
         games = [g for g in self._apifootball_games().get(team_id, [])
                  if g["timestamp"] < before_ts and g["rating"] is not None][:N_MATCHES]
         if len(games) < N_MATCHES:
-            raise Exception(f"Couldn't find {N_MATCHES} API-Football matches for {team_name} "
+            raise Exception(f"Couldn't find {N_MATCHES} games with form stats for {team_name} "
                             f"(have {len(games)})")
+        # Games the team played (with stats, per the Sofascore games cache) that are newer
+        # than the oldest one used but missing from our history: too many means stale form.
+        used = {g["timestamp"] for g in games}
+        missing = [e for e in self.events_cache.get(f"{team_id}", [])
+                   if e.get("hasStats") and games[-1]["timestamp"] < e.get("startTimestamp", 0) < before_ts
+                   and e["startTimestamp"] not in used]
+        if len(missing) > MAX_MISSING_FORM_GAMES:
+            raise Exception(f"Form history for {team_name} is stale: {len(missing)} newer games are missing")
         ranking = self._latest_ranking(team_id, before_ts)
         if ranking is None:
             raise Exception(f"No FIFA ranking known for {team_name}")

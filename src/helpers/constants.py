@@ -14,3 +14,7 @@ TEST_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "test" / "test.c
 FORM_SOURCE = "apifootball"
 CACHE_DIR = Path(__file__).parent.parent.parent / "data" / "cache"
 APIFOOTBALL_MATCHES_PATH = CACHE_DIR / "apifootball_matches.json"
+FORM_SEED_PATH = CACHE_DIR / "form_seed.json"
+# Drop a team-date if its form games skip more than this many newer games the team is
+# known to have played with stats (seeded history can be older than the team's latest games).
+MAX_MISSING_FORM_GAMES = 1
