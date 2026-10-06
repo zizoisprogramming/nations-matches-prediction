@@ -289,6 +289,8 @@ class FeatureExtraction():
                 print(f"  ⚠️  Sofascore homepage attempt {attempt}/3 failed: {str(e).splitlines()[0]}")
                 await asyncio.sleep(5 * attempt)
         await asyncio.sleep(2)
+        # Sofascore sends suspected bots to a CAPTCHA page; every API call then gets a 403.
+        self._sofascore_captcha = "captcha" in page.url
         return playwright, browser, page
 
     async def _search_team_id(self, page, team_name: str) -> int | None:
@@ -522,7 +524,10 @@ class FeatureExtraction():
         try:
             
             done_idx = set()
+            idx = None
             try:
+                if getattr(self, "_sofascore_captcha", False):
+                    raise SofascoreBlocked("homepage redirected to the CAPTCHA page")
                 for idx, row in df.iterrows():
                     done_idx.add(idx)
                     match_date = pd.to_datetime(row["date"]).date()
@@ -592,6 +597,16 @@ class FeatureExtraction():
             return self._add_sofascore_features(df)
 
         df = df.copy()
+        if FORM_SOURCE == "auto":
+            # Sofascore first: fetching fills the ratings cache for every team-date it can
+            # get. Whatever it can't (CAPTCHA, block, missing stats) falls back below to the
+            # API-Football / seeded history.
+            missing = [i for i, row in df.iterrows() if not all(
+                self._cached_form(str(row[c]).strip(), row["date"]) for c in ("home_team", "away_team"))]
+            if missing:
+                print(f"Fetching Sofascore form stats for {len(missing)} matches")
+                self._add_sofascore_features(df.loc[missing])
+
         to_drop = []
         for idx, row in df.iterrows():
             match_date = pd.to_datetime(row["date"]).date()
@@ -602,7 +617,7 @@ class FeatureExtraction():
                     team_id = self.team_ids.get(team)
                     if team_id is None:
                         raise Exception(f"{team} is not in team_ids.json")
-                    cached = self.ratings_cache.get(f"{team_id}_{before_ts}")
+                    cached = self._cached_form(team, row["date"])
                     stats = (self._form_stats_from_cache(cached) if cached
                              else self._apifootball_form_stats(team_id, team, before_ts))
                     for k, v in stats.items():
@@ -613,6 +628,18 @@ class FeatureExtraction():
                     to_drop.append(idx)
                     break
         return df.drop(index=sorted(set(to_drop))).reset_index(drop=True)
+
+    def _cached_form(self, team: str, date) -> dict | None:
+        """The ratings-cache entry for a team before a date, if it has complete stats."""
+        team_id = self.team_ids.get(team)
+        if team_id is None:
+            return None
+        d = pd.to_datetime(date).date()
+        ts = int(dt.datetime(d.year, d.month, d.day, tzinfo=dt.timezone.utc).timestamp())
+        entry = self.ratings_cache.get(f"{team_id}_{ts}")
+        if not entry or len(entry.get("fix") or []) < N_MATCHES or any(v is None for v in entry["fix"][:N_MATCHES]):
+            return None
+        return entry
 
     @staticmethod
     def _form_stats_from_cache(entry: dict) -> dict:
@@ -701,9 +728,13 @@ class FeatureExtraction():
         stats could be computed, with df's original columns.
         """
         if FORM_SOURCE != "sofascore":
-            # API-Football stats are collected daily (src/collect_apifootball.py), so this
-            # only computes them locally and drops matches that don't have them.
-            return self._add_form_features(df)[df.columns.to_list()]
+            # Form stats from cached / live Sofascore ("auto") with the API-Football and
+            # seeded history as fallback; rows without them are dropped.
+            out = self._add_form_features(df)
+            if self._refreshed:
+                self._trim_events_cache(self._refreshed)
+                save_cache(RATINGS_CACHE_PATH, self.ratings_cache)
+            return out[df.columns.to_list()]
         out = self._add_sofascore_features(df)
         self._trim_events_cache(self._refreshed)
         save_cache(RATINGS_CACHE_PATH, self.ratings_cache)
