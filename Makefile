@@ -1,4 +1,4 @@
-.PHONY: train test test_features scrape stage app feature_extraction feature_selection feature_scaling 
+.PHONY: train test test_features scrape stage app collect feature_extraction feature_selection feature_scaling 
 
 TODAY := $(shell date +%Y-%m-%d)
 
@@ -29,6 +29,9 @@ stage:
 
 app:
 	@uv run streamlit run app.py
+
+collect:
+	@uv run python -m src.collect_apifootball
 
 feature_extraction: $(DATA_DIR)/extracted.csv
 feature_selection: $(DATA_DIR)/selected.csv

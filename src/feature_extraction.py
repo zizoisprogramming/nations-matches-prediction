@@ -25,7 +25,7 @@ from playwright.async_api import async_playwright
 from src.helpers.cache import load_cache, save_cache
 from src.helpers.apis import _api_get, SofascoreBlocked, RequestFailed
 from src.helpers.helpers import _safe_ratio, slim_event
-from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH
+from src.helpers.constants import NEW_DATA_PATH, TEST_DATA_PATH, FORM_SOURCE, APIFOOTBALL_MATCHES_PATH
 
 nest_asyncio.apply()
 
@@ -582,12 +582,116 @@ class FeatureExtraction():
                 self.events_cache[f"{team_id}"] = kept
         save_cache(EVENTS_CACHE_PATH, self.events_cache)
 
+    def _add_form_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Last-N-games form features for both teams, from FORM_SOURCE. Either way, a team
+        and date whose Sofascore stats are already in the ratings cache keeps them, so
+        historical rows are unchanged.
+        """
+        if FORM_SOURCE == "sofascore":
+            return self._add_sofascore_features(df)
+
+        df = df.copy()
+        to_drop = []
+        for idx, row in df.iterrows():
+            match_date = pd.to_datetime(row["date"]).date()
+            before_ts = int(dt.datetime(match_date.year, match_date.month, match_date.day, tzinfo=dt.timezone.utc).timestamp())
+            for prefix, team_col in [("home", "home_team"), ("away", "away_team")]:
+                team = str(row[team_col]).strip()
+                try:
+                    team_id = self.team_ids.get(team)
+                    if team_id is None:
+                        raise Exception(f"{team} is not in team_ids.json")
+                    cached = self.ratings_cache.get(f"{team_id}_{before_ts}")
+                    stats = (self._form_stats_from_cache(cached) if cached
+                             else self._apifootball_form_stats(team_id, team, before_ts))
+                    for k, v in stats.items():
+                        col_name = f"{prefix}_ranking" if k == "ranking" else f"{prefix}_{k}"
+                        df.at[idx, col_name] = v
+                except Exception as e:
+                    print(e)
+                    to_drop.append(idx)
+                    break
+        return df.drop(index=sorted(set(to_drop))).reset_index(drop=True)
+
+    @staticmethod
+    def _form_stats_from_cache(entry: dict) -> dict:
+        """Ratings-cache entry -> the same feature dict _last_n_form_stats returns."""
+        out = {"ranking": entry["ranking"]}
+        for i in range(len(entry["fix"])):
+            out[f"fix_{i + 1}"] = entry["fix"][i]
+            out[f"shots_{i + 1}"] = entry["shots"][i]
+            out[f"scored_{i + 1}"] = entry["scored"][i]
+            out[f"shots_against_{i + 1}"] = entry["shots_against"][i]
+            out[f"relative_shots_{i + 1}"] = entry["relative_shots"][i]
+            out[f"relative_goals_{i + 1}"] = entry["relative_goals"][i]
+        return out
+
+    def _apifootball_games(self) -> dict:
+        """Sofascore team id -> its collected API-Football games, newest first."""
+        if getattr(self, "_af_games", None) is None:
+            from src.collect_apifootball import team_summary
+            games = {}
+            for record in load_cache(APIFOOTBALL_MATCHES_PATH).values():
+                teams = list(record["teams"].values())
+                for side in teams:
+                    if side.get("sofascore_id") is None:
+                        continue
+                    other = next(t for t in teams if t is not side)
+                    games.setdefault(side["sofascore_id"], []).append({
+                        "timestamp": record["timestamp"],
+                        "scored": side["scored"],
+                        "conceded": side["conceded"],
+                        **team_summary(side["players"], other["players"]),
+                    })
+            for g in games.values():
+                g.sort(key=lambda x: x["timestamp"], reverse=True)
+            self._af_games = games
+        return self._af_games
+
+    def _latest_ranking(self, team_id: int, before_ts: int):
+        """Most recent FIFA ranking for the team before the date, from the cached
+        Sofascore games (no requests). Stopgap until a live ranking source is added."""
+        best = None
+        for e in self.events_cache.get(f"{team_id}", []):
+            if e.get("startTimestamp", 0) >= before_ts:
+                continue
+            side = "home" if e.get("homeTeamId") == team_id else "away"
+            rank = e.get(f"{side}Ranking")
+            if rank is not None and (best is None or e["startTimestamp"] > best[0]):
+                best = (e["startTimestamp"], rank)
+        return best[1] if best else None
+
+    def _apifootball_form_stats(self, team_id: int, team_name: str, before_ts: int) -> dict:
+        """Same output as _last_n_form_stats, from the daily-collected API-Football games."""
+        games = [g for g in self._apifootball_games().get(team_id, [])
+                 if g["timestamp"] < before_ts and g["rating"] is not None][:N_MATCHES]
+        if len(games) < N_MATCHES:
+            raise Exception(f"Couldn't find {N_MATCHES} API-Football matches for {team_name} "
+                            f"(have {len(games)})")
+        ranking = self._latest_ranking(team_id, before_ts)
+        if ranking is None:
+            raise Exception(f"No FIFA ranking known for {team_name}")
+        out = {"ranking": ranking}
+        for i, g in enumerate(games, 1):
+            out[f"fix_{i}"] = g["rating"]
+            out[f"shots_{i}"] = g["shots"]
+            out[f"scored_{i}"] = g["scored"]
+            out[f"shots_against_{i}"] = g["shots_against"]
+            out[f"relative_shots_{i}"] = _safe_ratio(g["shots"], g["shots_against"])
+            out[f"relative_goals_{i}"] = _safe_ratio(g["scored"], g["conceded"])
+        return out
+
     def warm_form_cache(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Refresh and compute Sofascore form stats for every row of df into the ratings
         cache, then trim the events cache of the teams involved. Returns the rows whose
         stats could be computed, with df's original columns.
         """
+        if FORM_SOURCE != "sofascore":
+            # API-Football stats are collected daily (src/collect_apifootball.py), so this
+            # only computes them locally and drops matches that don't have them.
+            return self._add_form_features(df)[df.columns.to_list()]
         out = self._add_sofascore_features(df)
         self._trim_events_cache(self._refreshed)
         save_cache(RATINGS_CACHE_PATH, self.ratings_cache)
@@ -654,7 +758,7 @@ class FeatureExtraction():
             X = df.copy()
             X = self._add_location_features(X)
             X = self._add_weather_features(X)
-            X = self._add_sofascore_features(X)
+            X = self._add_form_features(X)
             if X.empty:
                 print("no matches left after Sofascore features")
                 sys.exit(1)
