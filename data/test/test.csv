@@ -1,23 +1,4 @@
 date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,year,month,day,result
-2024-06-24,Albania,Spain,0.0,1.0,EURO,Düsseldorf,Germany,True,2024,6,24,2
-2024-06-24,Croatia,Italy,1.0,1.0,EURO,Leipzig,Germany,True,2024,6,24,0
-2024-06-24,Colombia,Paraguay,2.0,1.0,COPA,Houston,United States,True,2024,6,24,1
-2024-06-24,Brazil,Costa Rica,0.0,0.0,COPA,Inglewood,United States,True,2024,6,24,0
-2024-06-25,England,Slovenia,0.0,0.0,EURO,Cologne,Germany,True,2024,6,25,0
-2024-06-25,Denmark,Serbia,0.0,0.0,EURO,Munich,Germany,True,2024,6,25,0
-2024-06-25,Netherlands,Austria,2.0,3.0,EURO,Berlin,Germany,True,2024,6,25,2
-2024-06-25,France,Poland,1.0,1.0,EURO,Dortmund,Germany,True,2024,6,25,0
-2024-06-25,Peru,Canada,0.0,1.0,COPA,Kansas City,United States,True,2024,6,25,2
-2024-06-25,Chile,Argentina,0.0,1.0,COPA,East Rutherford,United States,True,2024,6,25,2
-2024-06-26,Slovakia,Romania,1.0,1.0,EURO,Frankfurt,Germany,True,2024,6,26,0
-2024-06-26,Ukraine,Belgium,0.0,0.0,EURO,Stuttgart,Germany,True,2024,6,26,0
-2024-06-26,Georgia,Portugal,2.0,0.0,EURO,Gelsenkirchen,Germany,True,2024,6,26,1
-2024-06-26,Czech Republic,Turkey,1.0,2.0,EURO,Hamburg,Germany,True,2024,6,26,2
-2024-06-26,Ecuador,Jamaica,3.0,1.0,COPA,Las Vegas,United States,True,2024,6,26,1
-2024-06-27,Uruguay,Bolivia,5.0,0.0,COPA,East Rutherford,United States,True,2024,6,27,1
-2024-06-28,Colombia,Costa Rica,3.0,0.0,COPA,Glendale,United States,True,2024,6,28,1
-2024-06-28,Paraguay,Brazil,1.0,4.0,COPA,Las Vegas,United States,True,2024,6,28,2
-2024-06-29,Switzerland,Italy,2.0,0.0,EURO,Berlin,Germany,True,2024,6,29,1
 2024-06-29,Germany,Denmark,2.0,0.0,EURO,Dortmund,Germany,False,2024,6,29,1
 2024-06-29,Argentina,Peru,2.0,0.0,COPA,Miami Gardens,United States,True,2024,6,29,1
 2024-06-29,Canada,Chile,0.0,0.0,COPA,Orlando,United States,True,2024,6,29,0
@@ -320,3 +301,22 @@ date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,y
 2026-09-24,Tunisia,Uganda,1.0,1.0,Africa Cup of Nations Qualifying,Hammadi Agrebi Stadium,Tunisia,,2026,9,24,0
 2026-09-23,Turks and Caicos Islands,Montserrat,0.0,2.0,Concacaf Nations League,Providenciales,Turks and Caicos Islands,,2026,9,23,2
 2026-09-23,Aruba,Antigua and Barbuda,1.0,0.0,Concacaf Nations League,North Sound,Antigua and Barbuda,,2026,9,23,1
+2026-09-27,Haiti,Costa Rica,2.0,0.0,Concacaf Nations League,Sabina Park,Jamaica,,2026,9,27,1
+2026-10-06,Kazakhstan,Faroe Islands,2.0,2.0,UEFA Nations League,Astana,Kazakhstan,,2026,10,6,0
+2026-10-06,Moldova,Slovakia,0.0,4.0,UEFA Nations League,Chisinau,Moldova,,2026,10,6,2
+2026-10-06,Montserrat,Turks and Caicos Islands,4.0,1.0,Concacaf Nations League,Providenciales,Turks and Caicos Islands,,2026,10,6,1
+2026-10-06,Antigua and Barbuda,Aruba,3.0,2.0,Concacaf Nations League,North Sound,Antigua and Barbuda,,2026,10,6,1
+2026-10-06,Angola,Malawi,3.0,1.0,Africa Cup of Nations Qualifying,Estádio 11 de Novembro,Angola,,2026,10,6,1
+2026-10-05,Romania,Sweden,0.0,1.0,UEFA Nations League,Bucuresti,Romania,,2026,10,5,2
+2026-10-05,Bosnia and Herzegovina,Poland,1.0,0.0,UEFA Nations League,Zenica,Bosnia and Herzegovina,,2026,10,5,1
+2026-10-04,Malta,Andorra,1.0,0.0,UEFA Nations League,Attard,Malta,,2026,10,4,1
+2026-10-04,Azerbaijan,Lithuania,1.0,0.0,UEFA Nations League,Baku,Azerbaijan,,2026,10,4,1
+2026-10-04,Netherlands,Serbia,2.0,1.0,UEFA Nations League,Eindhoven,Netherlands,,2026,10,4,1
+2026-10-04,Greece,Germany,0.0,0.0,UEFA Nations League,Thessaloniki,Greece,,2026,10,4,0
+2026-10-04,Kosovo,Austria,1.0,1.0,UEFA Nations League,Prishtina,Kosovo,,2026,10,4,0
+2026-10-04,Republic of Ireland,Israel,1.0,1.0,UEFA Nations League,Backa Topola,Serbia,,2026,10,4,0
+2026-10-04,Portugal,Norway,2.0,1.0,UEFA Nations League,Porto,Portugal,,2026,10,4,1
+2026-10-04,Wales,Denmark,0.0,1.0,UEFA Nations League,Cardiff,Wales,,2026,10,4,2
+2026-10-04,Trinidad and Tobago,Curaçao,1.0,1.0,Concacaf Nations League,Port of Spain,Trinidad and Tobago,,2026,10,4,0
+2026-10-04,Turks and Caicos Islands,British Virgin Islands,3.0,0.0,Concacaf Nations League,Providenciales,Turks and Caicos Islands,,2026,10,4,1
+2026-10-04,Aruba,Anguilla,3.0,2.0,Concacaf Nations League,North Sound,Antigua and Barbuda,,2026,10,4,1
