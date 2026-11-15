@@ -1,11 +1,4 @@
 date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,year,month,day,result
-2024-06-29,Germany,Denmark,2.0,0.0,EURO,Dortmund,Germany,False,2024,6,29,1
-2024-06-29,Argentina,Peru,2.0,0.0,COPA,Miami Gardens,United States,True,2024,6,29,1
-2024-06-29,Canada,Chile,0.0,0.0,COPA,Orlando,United States,True,2024,6,29,0
-2024-06-30,England,Slovakia,2.0,1.0,EURO,Gelsenkirchen,Germany,True,2024,6,30,1
-2024-06-30,Spain,Georgia,4.0,1.0,EURO,Cologne,Germany,True,2024,6,30,1
-2024-06-30,Mexico,Ecuador,0.0,0.0,COPA,Glendale,United States,True,2024,6,30,0
-2024-06-30,Jamaica,Venezuela,0.0,3.0,COPA,Austin,United States,True,2024,6,30,2
 2024-07-01,France,Belgium,1.0,0.0,EURO,Düsseldorf,Germany,True,2024,7,1,1
 2024-07-01,Portugal,Slovenia,0.0,0.0,EURO,Frankfurt,Germany,True,2024,7,1,0
 2024-07-01,Bolivia,Panama,1.0,3.0,COPA,Orlando,United States,True,2024,7,1,2
@@ -320,3 +313,10 @@ date,home_team,away_team,home_score,away_score,tournament,city,country,neutral,y
 2026-10-04,Trinidad and Tobago,Curaçao,1.0,1.0,Concacaf Nations League,Port of Spain,Trinidad and Tobago,,2026,10,4,0
 2026-10-04,Turks and Caicos Islands,British Virgin Islands,3.0,0.0,Concacaf Nations League,Providenciales,Turks and Caicos Islands,,2026,10,4,1
 2026-10-04,Aruba,Anguilla,3.0,2.0,Concacaf Nations League,North Sound,Antigua and Barbuda,,2026,10,4,1
+2026-11-12,Congo DR,Sierra Leone,3.0,1.0,Africa Cup of Nations Qualifying,Kinshasa,Congo,,2026,11,12,1
+2026-11-12,Equatorial Guinea,Zimbabwe,0.0,0.0,Africa Cup of Nations Qualifying,Yaoundé,Cameroon,,2026,11,12,0
+2026-11-12,Madagascar,Guinea-Bissau,1.0,1.0,Africa Cup of Nations Qualifying,Meknès,Morocco,,2026,11,12,0
+2026-11-12,Benin,Central African Republic,4.0,1.0,Africa Cup of Nations Qualifying,Abidjan,Ivory Coast,,2026,11,12,1
+2026-11-12,Cameroon,Namibia,2.0,0.0,Africa Cup of Nations Qualifying,Japoma,Cameroon,,2026,11,12,1
+2026-11-12,Ivory Coast,Gambia,2.0,1.0,Africa Cup of Nations Qualifying,Bouaké,Ivory Coast,,2026,11,12,1
+2026-11-12,Senegal,Sudan,4.0,1.0,Africa Cup of Nations Qualifying,Dakar,Senegal,,2026,11,12,1
